@@ -12,8 +12,8 @@
 # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 
-# Unix hexdump utility
-# Cowgol cannot detect EOF == -1
+# Clone of Unix hexdump -C
+# Should work on all Cowgol systems
 
 include "cowgol.coh";
 include "argv.coh";
