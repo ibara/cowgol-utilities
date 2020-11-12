@@ -61,7 +61,7 @@ sub Hexdump() is
 
 	var k: uint8 := i;
 	if len == 0 then
-		if i < 7 then
+		if i < 8 then
 			print(" ");
 		end if;
 
