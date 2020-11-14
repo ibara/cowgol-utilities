@@ -701,9 +701,6 @@ while (addr > 0) loop
 	addr := addr - 1;
 end loop;
 
-#print(FileName);
-#print(":\n");
-
 var count: uint32 := 7;
 while (pc as uint32 < len) and (count > 0) loop
 	pc := pc + Disassemble();
