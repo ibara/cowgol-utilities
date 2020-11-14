@@ -1,0 +1,101 @@
+# Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# Brainfuck to Cowgol transpiler
+# XXX: Comma operator not yet implemented; no cross-platform input?
+
+include "cowgol.coh";
+include "argv.coh";
+include "file.coh";
+
+var InputFile: FCB;
+var OutputFile: FCB;
+
+var len: uint32;
+var depth: int32 := 0;
+
+sub Compile() is
+	var c: uint8 := FCBGetChar(&InputFile);
+
+	case c is
+		when 0: ;
+		when '<': FCBPutString(&OutputFile, "index := index - 1;\n");
+		when '>': FCBPutString(&OutputFile, "index := index + 1;\n");
+		when '+': FCBPutString(&OutputFile, "Array[index] := Array[index] + 1;\n");
+		when '-': FCBPutString(&OutputFile, "Array[index] := Array[index] - 1;\n");
+		when ',': ; # XXX: No easy cross-platform to get keyboard input yet?
+		when '.': FCBPutString(&OutputFile, "print_char(Array[index]);\n");
+		when '[': depth := depth + 1; FCBPutString(&OutputFile, "while Array[index] != 0 loop\n");
+		when ']': FCBPutString(&OutputFile, "end loop;\n"); depth := depth - 1; if depth < 0 then ExitWithError(); end if;
+	end case;
+
+	len := len - 1;
+end sub;
+
+ArgvInit();
+
+var InName: [uint8] := ArgvNext();
+if InName == (0 as [uint8]) then
+	print("usage: bfc file.bf file.cow\n");
+	ExitWithError();
+end if;
+
+if FCBOpenIn(&InputFile, InName) != 0 then
+	print("bfc: cannot open ");
+	print(InName);
+	print("\n");
+	ExitWithError();
+end if;
+
+var OutName: [uint8] := ArgvNext();
+if OutName == (0 as [uint8]) then
+	print("usage: bfc file.bf file.cow\n");
+	ExitWithError();
+end if;
+
+if FCBOpenOut(&OutputFile, OutName) != 0 then
+	print("bfc: cannot open ");
+	print(OutName);
+	print("\n");
+	if FCBClose(&InputFile) != 0 then
+		ExitWithError();
+	end if;
+	ExitWithError();
+end if;
+
+# According to the official docs, the array should be
+# at least 30,000 in size. But we're going to keep it
+# small, since Cowgol is aimed at small systems.
+
+FCBPutString(&OutputFile, "include \"cowgol.coh\";\n");
+FCBPutString(&OutputFile, "var Array: uint8[2048];\n");
+FCBPutString(&OutputFile, "var index: uint16 := 0;\n");
+FCBPutString(&OutputFile, "while index < 2048 loop\n");
+FCBPutString(&OutputFile, "Array[index] := 0;\n");
+FCBPutString(&OutputFile, "index := index + 1;\n");
+FCBPutString(&OutputFile, "end loop;\n");
+FCBPutString(&OutputFile, "index := 0;\n");
+
+len := FCBExt(&InputFile);
+while len > 0 loop 
+	Compile();
+end loop;
+
+if FCBClose(&OutputFile) != 0 then
+	ExitWithError();
+end if;
+
+if FCBClose(&InputFile) != 0 then
+	ExitWithError();
+end if;

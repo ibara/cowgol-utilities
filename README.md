@@ -10,6 +10,7 @@ the CP/M backend. They should work on all supported Cowgol systems.
 
 Utilities list
 --------------
+* bfc.cow: Brainfuck to Cowgol transpiler
 * hexdump.cow: Clone of the OpenBSD `hexdump -C` utility
 
 License
