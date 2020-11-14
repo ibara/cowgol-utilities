@@ -638,9 +638,6 @@ sub Disassemble(): (bytes: uint16) is
 			bytes := TwoByte("cpi", 0);
 		when 0xff:
 			OneByte("rst\t7", 0);
-		when else:
-			print("?? ");
-			print_hex_i8(byte);
 	end case;
 
 	print("\n");
