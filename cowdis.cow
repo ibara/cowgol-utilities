@@ -1,0 +1,715 @@
+# Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# 8080 disassembler
+
+include "cowgol.coh";
+include "argv.coh";
+include "file.coh";
+
+var InputFile: FCB;
+
+var addr: uint16;
+var len: uint32;
+var pc: uint16;
+var byte: uint8;
+
+sub OneByte(inst: [uint8], reg: [uint8]) is
+	print_hex_i8(byte);
+	print("\t\t");
+	print(inst);
+	if (reg != 0 as [uint8]) then
+		print("\t");
+		print(reg);
+	end if;
+end sub;
+
+sub TwoByte(inst: [uint8], reg: [uint8]): (bytes: uint16) is
+	var t: uint8 := FCBGetChar(&InputFile);
+
+	print_hex_i8(byte);
+	print(" ");
+	print_hex_i8(t);
+	print("\t\t");
+	print(inst);
+	print("\t");
+	if (reg != 0) then
+		print(reg);
+		print(", ");
+	end if;
+	print_hex_i8(t);
+	print("h");
+
+	bytes := 2;
+end sub;
+
+sub ThreeByte(inst: [uint8], reg: [uint8]): (bytes: uint16) is
+	var t1: uint8 := FCBGetChar(&InputFile);
+	var t2: uint8 := FCBGetChar(&InputFile);
+
+	print_hex_i8(byte);
+	print(" ");
+	print_hex_i8(t1);
+	print(" ");
+	print_hex_i8(t2);
+	print("\t");
+	print(inst);
+	print("\t");
+	if (reg != 0 as [uint8]) then
+		print(reg);
+		print(", ");
+	end if;
+	print_hex_i8(t2);
+	print_hex_i8(t1);
+	print("h");
+
+	bytes := 3;
+end sub;
+
+# Cowgol doesn't notice if you have 2+ identical strings.
+# So you have lots of repetition in the binary.
+# This is gross, but perhaps the best we can do for now.
+sub Disassemble(): (bytes: uint16) is
+	var a: [uint8] := "a";
+	var b: [uint8] := "b";
+	var c: [uint8] := "c";
+	var d: [uint8] := "d";
+	var e: [uint8] := "e";
+	var h: [uint8] := "h";
+	var l: [uint8] := "l";
+	var m: [uint8] := "m";
+	var psw: [uint8] := "psw";
+	var sp: [uint8] := "sp";
+
+	var nop: [uint8] := "nop";
+	var lxi: [uint8] := "lxi";
+	var stax: [uint8] := "stax";
+	var inx: [uint8] := "inx";
+	var inr: [uint8] := "inr";
+	var dcr: [uint8] := "dcr";
+	var mvi: [uint8] := "mvi";
+	var dad: [uint8] := "dad";
+	var ldax: [uint8] := "ldax";
+	var dcx: [uint8] := "dcx";
+	var shld: [uint8] := "shld";
+	var mov: [uint8] := "mov";
+	var add: [uint8] := "add";
+	var adc: [uint8] := "adc";
+	var sub_inst: [uint8] := "sub";
+	var sbb: [uint8] := "sbb";
+	var ana: [uint8] := "ana";
+	var xra: [uint8] := "xra";
+	var ora: [uint8] := "ora";
+	var cmp: [uint8] := "cmp";
+	var pop: [uint8] := "pop";
+	var jmp: [uint8] := "jmp";
+	var push: [uint8] := "push";
+	var ret: [uint8] := "ret";
+	var call: [uint8] := "call";
+
+	bytes := 1;
+	byte := FCBGetChar(&InputFile);
+
+	print("    ");
+	print_hex_i16(pc);
+	print(":\t");
+
+	case byte is
+		when 0x00:
+			OneByte(nop, 0);
+		when 0x01:
+			bytes := ThreeByte(lxi, b);
+		when 0x02:
+			OneByte(stax, b);
+		when 0x03:
+			OneByte(inx, b);
+		when 0x04:
+			OneByte(inr, b);
+		when 0x05:
+			OneByte(dcr, b);
+		when 0x06:
+			bytes := TwoByte(mvi, b);
+		when 0x07:
+			OneByte("rlc", 0);
+		when 0x08:
+			OneByte(nop, 0);
+		when 0x09:
+			OneByte(dad, b);
+		when 0x0a:
+			OneByte(ldax, b);
+		when 0x0b:
+			OneByte(dcx, b);
+		when 0x0c:
+			OneByte(inr, c);
+		when 0x0d:
+			OneByte(dcr, c);
+		when 0x0e:
+			bytes := TwoByte(mvi, c);
+		when 0x0f:
+			OneByte("rrc", 0);
+		when 0x10:
+			OneByte(nop, 0);
+		when 0x11:
+			bytes := ThreeByte(lxi, d);
+		when 0x12:
+			OneByte(stax, d);
+		when 0x13:
+			OneByte(inx, d);
+		when 0x14:
+			OneByte(inr, d);
+		when 0x15:
+			OneByte(dcr, d);
+		when 0x16:
+			bytes := TwoByte(mvi, d);
+		when 0x17:
+			OneByte("ral", 0);
+		when 0x18:
+			OneByte(nop, 0);
+		when 0x19:
+			OneByte(dad, d);
+		when 0x1a:
+			OneByte(ldax, d);
+		when 0x1b:
+			OneByte(dcx, d);
+		when 0x1c:
+			OneByte(inr, e);
+		when 0x1d:
+			OneByte(dcr, e);
+		when 0x1e:
+			bytes := TwoByte(mvi, e);
+		when 0x1f:
+			OneByte("rar", 0);
+		when 0x20:
+			OneByte(nop, 0);
+		when 0x21:
+			bytes := ThreeByte(lxi, h);
+		when 0x22:
+			bytes := ThreeByte(shld, 0);
+		when 0x23:
+			OneByte(inx, h);
+		when 0x24:
+			OneByte(inr, h);
+		when 0x25:
+			OneByte(dcr, h);
+		when 0x26:
+			bytes := TwoByte(mvi, h);
+		when 0x27:
+			OneByte("daa", 0);
+		when 0x28:
+			OneByte(nop, 0);
+		when 0x29:
+			OneByte(dad, h);
+		when 0x2a:
+			bytes := ThreeByte("lhld", 0);
+		when 0x2b:
+			OneByte(dcx, h);
+		when 0x2c:
+			OneByte(inr, l);
+		when 0x2d:
+			OneByte(dcr, l);
+		when 0x2e:
+			bytes := TwoByte(mvi, l);
+		when 0x2f:
+			OneByte("cma", 0);
+		when 0x30:
+			OneByte(nop, 0);
+		when 0x31:
+			bytes := ThreeByte(lxi, sp);
+		when 0x32:
+			bytes := ThreeByte(shld, 0);
+		when 0x33:
+			OneByte(inx, sp);
+		when 0x34:
+			OneByte(inr, m);
+		when 0x35:
+			OneByte(dcr, m);
+		when 0x36:
+			bytes := TwoByte(mvi, m);
+		when 0x37:
+			OneByte("stc", 0);
+		when 0x38:
+			OneByte(nop, 0);
+		when 0x39:
+			OneByte(dad, sp);
+		when 0x3a:
+			bytes := ThreeByte("lda", 0);
+		when 0x3b:
+			OneByte(dcx, sp);
+		when 0x3c:
+			OneByte(inr, a);
+		when 0x3d:
+			OneByte(dcr, a);
+		when 0x3e:
+			bytes := TwoByte(mvi, a);
+		when 0x3f:
+			OneByte("cmc", 0);
+		when 0x40:
+			OneByte(mov, "b, b");
+		when 0x41:
+			OneByte(mov, "b, c");
+		when 0x42:
+			OneByte(mov, "b, d");
+		when 0x43:
+			OneByte(mov, "b, e");
+		when 0x44:
+			OneByte(mov, "b, h");
+		when 0x45:
+			OneByte(mov, "b, l");
+		when 0x46:
+			OneByte(mov, "b, m");
+		when 0x47:
+			OneByte(mov, "b, a");
+		when 0x48:
+			OneByte(mov, "c, b");
+		when 0x49:
+			OneByte(mov, "c, c");
+		when 0x4a:
+			OneByte(mov, "c, d");
+		when 0x4b:
+			OneByte(mov, "c, e");
+		when 0x4c:
+			OneByte(mov, "c, h");
+		when 0x4d:
+			OneByte(mov, "c, l");
+		when 0x4e:
+			OneByte(mov, "c, m");
+		when 0x4f:
+			OneByte(mov, "c, a");
+		when 0x50:
+			OneByte(mov, "d, b");
+		when 0x51:
+			OneByte(mov, "d, c");
+		when 0x52:
+			OneByte(mov, "d, d");
+		when 0x53:
+			OneByte(mov, "d, e");
+		when 0x54:
+			OneByte(mov, "d, h");
+		when 0x55:
+			OneByte(mov, "d, l");
+		when 0x56:
+			OneByte(mov, "d, m");
+		when 0x57:
+			OneByte(mov, "d, a");
+		when 0x58:
+			OneByte(mov, "e, b");
+		when 0x59:
+			OneByte(mov, "e, c");
+		when 0x5a:
+			OneByte(mov, "e, d");
+		when 0x5b:
+			OneByte(mov, "e, e");
+		when 0x5c:
+			OneByte(mov, "e, h");
+		when 0x5d:
+			OneByte(mov, "e, l");
+		when 0x5e:
+			OneByte(mov, "e, m");
+		when 0x5f:
+			OneByte(mov, "e, a");
+		when 0x60:
+			OneByte(mov, "h, b");
+		when 0x61:
+			OneByte(mov, "h, c");
+		when 0x62:
+			OneByte(mov, "h, d");
+		when 0x63:
+			OneByte(mov, "h, e");
+		when 0x64:
+			OneByte(mov, "h, h");
+		when 0x65:
+			OneByte(mov, "h, l");
+		when 0x66:
+			OneByte(mov, "h, m");
+		when 0x67:
+			OneByte(mov, "h, a");
+		when 0x68:
+			OneByte(mov, "l, b");
+		when 0x69:
+			OneByte(mov, "l, c");
+		when 0x6a:
+			OneByte(mov, "l, d");
+		when 0x6b:
+			OneByte(mov, "l, e");
+		when 0x6c:
+			OneByte(mov, "l, h");
+		when 0x6d:
+			OneByte(mov, "l, l");
+		when 0x6e:
+			OneByte(mov, "l, m");
+		when 0x6f:
+			OneByte(mov, "l, a");
+		when 0x70:
+			OneByte(mov, "m, b");
+		when 0x71:
+			OneByte(mov, "m, c");
+		when 0x72:
+			OneByte(mov, "m, d");
+		when 0x73:
+			OneByte(mov, "m, e");
+		when 0x74:
+			OneByte(mov, "m, h");
+		when 0x75:
+			OneByte(mov, "m, l");
+		when 0x76:
+			OneByte("hlt", 0);
+		when 0x77:
+			OneByte(mov, "m, a");
+		when 0x78:
+			OneByte(mov, "a, b");
+		when 0x79:
+			OneByte(mov, "a, c");
+		when 0x7a:
+			OneByte(mov, "a, d");
+		when 0x7b:
+			OneByte(mov, "a, e");
+		when 0x7c:
+			OneByte(mov, "a, h");
+		when 0x7d:
+			OneByte(mov, "a, l");
+		when 0x7e:
+			OneByte(mov, "a, m");
+		when 0x7f:
+			OneByte(mov, "a, a");
+		when 0x80:
+			OneByte(add, b);
+		when 0x81:
+			OneByte(add, c);
+		when 0x82:
+			OneByte(add, d);
+		when 0x83:
+			OneByte(add, e);
+		when 0x84:
+			OneByte(add, h);
+		when 0x85:
+			OneByte(add, l);
+		when 0x86:
+			OneByte(add, m);
+		when 0x87:
+			OneByte(add, a);
+		when 0x88:
+			OneByte(adc, b);
+		when 0x89:
+			OneByte(adc, c);
+		when 0x8a:
+			OneByte(adc, d);
+		when 0x8b:
+			OneByte(adc, e);
+		when 0x8c:
+			OneByte(adc, h);
+		when 0x8d:
+			OneByte(adc, l);
+		when 0x8e:
+			OneByte(adc, m);
+		when 0x8f:
+			OneByte(adc, a);
+		when 0x90:
+			OneByte(sub_inst, b);
+		when 0x91:
+			OneByte(sub_inst, c);
+		when 0x92:
+			OneByte(sub_inst, d);
+		when 0x93:
+			OneByte(sub_inst, e);
+		when 0x94:
+			OneByte(sub_inst, h);
+		when 0x95:
+			OneByte(sub_inst, l);
+		when 0x96:
+			OneByte(sub_inst, m);
+		when 0x97:
+			OneByte(sub_inst, a);
+		when 0x98:
+			OneByte(sbb, b);
+		when 0x99:
+			OneByte(sbb, c);
+		when 0x9a:
+			OneByte(sbb, d);
+		when 0x9b:
+			OneByte(sbb, e);
+		when 0x9c:
+			OneByte(sbb, h);
+		when 0x9d:
+			OneByte(sbb, l);
+		when 0x9e:
+			OneByte(sbb, m);
+		when 0x9f:
+			OneByte(sbb, a);
+		when 0xa0:
+			OneByte(ana, b);
+		when 0xa1:
+			OneByte(ana, c);
+		when 0xa2:
+			OneByte(ana, d);
+		when 0xa3:
+			OneByte(ana, e);
+		when 0xa4:
+			OneByte(ana, h);
+		when 0xa5:
+			OneByte(ana, l);
+		when 0xa6:
+			OneByte(ana, m);
+		when 0xa7:
+			OneByte(ana, a);
+		when 0xa8:
+			OneByte(xra, b);
+		when 0xa9:
+			OneByte(xra, c);
+		when 0xaa:
+			OneByte(xra, d);
+		when 0xab:
+			OneByte(xra, e);
+		when 0xac:
+			OneByte(xra, h);
+		when 0xad:
+			OneByte(xra, l);
+		when 0xae:
+			OneByte(xra, m);
+		when 0xaf:
+			OneByte(xra, a);
+		when 0xb0:
+			OneByte(ora, b);
+		when 0xb1:
+			OneByte(ora, c);
+		when 0xb2:
+			OneByte(ora, d);
+		when 0xb3:
+			OneByte(ora, e);
+		when 0xb4:
+			OneByte(ora, h);
+		when 0xb5:
+			OneByte(ora, l);
+		when 0xb6:
+			OneByte(ora, m);
+		when 0xb7:
+			OneByte(ora, a);
+		when 0xb8:
+			OneByte(cmp, b);
+		when 0xb9:
+			OneByte(cmp, c);
+		when 0xba:
+			OneByte(cmp, d);
+		when 0xbb:
+			OneByte(cmp, e);
+		when 0xbc:
+			OneByte(cmp, h);
+		when 0xbd:
+			OneByte(cmp, l);
+		when 0xbe:
+			OneByte(cmp, m);
+		when 0xbf:
+			OneByte(cmp, a);
+		when 0xc0:
+			OneByte("rnz", 0);
+		when 0xc1:
+			OneByte(pop, b);
+		when 0xc2:
+			bytes := ThreeByte("jnz", 0);
+		when 0xc3:
+			bytes := ThreeByte(jmp, 0);
+		when 0xc4:
+			bytes := ThreeByte("cnz", 0);
+		when 0xc5:
+			OneByte(push, b);
+		when 0xc6:
+			bytes := TwoByte("adi", 0);
+		when 0xc7:
+			OneByte("rst\t0", 0);
+		when 0xc8:
+			OneByte("rz", 0);
+		when 0xc9:
+			OneByte(ret, 0);
+		when 0xca:
+			bytes := ThreeByte("jz", 0);
+		when 0xcb:
+			bytes := ThreeByte(jmp, 0);
+		when 0xcc:
+			bytes := ThreeByte("cz", 0);
+		when 0xcd:
+			bytes := ThreeByte(call, 0);
+		when 0xce:
+			bytes := TwoByte("aci", 0);
+		when 0xcf:
+			OneByte("rst\t1", 0);
+		when 0xd0:
+			OneByte("rnc", 0);
+		when 0xd1:
+			OneByte(pop, d);
+		when 0xd2:
+			bytes := ThreeByte("jnc", 0);
+		when 0xd3:
+			bytes := TwoByte("out", 0);
+		when 0xd4:
+			bytes := ThreeByte("cnc", 0);
+		when 0xd5:
+			OneByte(push, d);
+		when 0xd6:
+			bytes := TwoByte("sui", 0);
+		when 0xd7:
+			OneByte("rst\t2", 0);
+		when 0xd8:
+			OneByte("rc", 0);
+		when 0xd9:
+			OneByte(ret, 0);
+		when 0xda:
+			bytes := ThreeByte("jc", 0);
+		when 0xdb:
+			bytes := TwoByte("in", 0);
+		when 0xdc:
+			bytes := ThreeByte("cc", 0);
+		when 0xdd:
+			bytes := ThreeByte(call, 0);
+		when 0xde:
+			bytes := TwoByte("sbi", 0);
+		when 0xdf:
+			OneByte("rst\t3", 0);
+		when 0xe0:
+			OneByte("rpo", 0);
+		when 0xe1:
+			OneByte(pop, h);
+		when 0xe2:
+			bytes := ThreeByte("jpo", 0);
+		when 0xe3:
+			OneByte("xthl", 0);
+		when 0xe4:
+			bytes := ThreeByte("cpo", 0);
+		when 0xe5:
+			OneByte(push, h);
+		when 0xe6:
+			bytes := TwoByte("ani", 0);
+		when 0xe7:
+			OneByte("rst\t4", 0);
+		when 0xe8:
+			OneByte("rpe", 0);
+		when 0xe9:
+			OneByte("pchl", 0);
+		when 0xea:
+			bytes := ThreeByte("jpe", 0);
+		when 0xeb:
+			OneByte("xchg", 0);
+		when 0xec:
+			bytes := ThreeByte("cpe", 0);
+		when 0xed:
+			bytes := ThreeByte(call, 0);
+		when 0xee:
+			bytes := TwoByte("xri", 0);
+		when 0xef:
+			OneByte("rst\t5", 0);
+		when 0xf0:
+			OneByte("rp", 0);
+		when 0xf1:
+			OneByte(pop, psw);
+		when 0xf2:
+			bytes := ThreeByte("jp", 0);
+		when 0xf3:
+			OneByte("di", 0);
+		when 0xf4:
+			bytes := ThreeByte("cp", 0);
+		when 0xf5:
+			OneByte(push, psw);
+		when 0xf6:
+			bytes := TwoByte("ori", 0);
+		when 0xf7:
+			OneByte("rst\t6", 0);
+		when 0xf8:
+			OneByte("rm", 0);
+		when 0xf9:
+			OneByte("sphl", 0);
+		when 0xfa:
+			bytes := ThreeByte("jm", 0);
+		when 0xfb:
+			OneByte("ei", 0);
+		when 0xfc:
+			bytes := ThreeByte("cm", 0);
+		when 0xfd:
+			bytes := ThreeByte(call, 0);
+		when 0xfe:
+			bytes := TwoByte("cpi", 0);
+		when 0xff:
+			OneByte("rst\t7", 0);
+		when else:
+			print("?? ");
+			print_hex_i8(byte);
+	end case;
+
+	print("\n");
+end sub;
+
+sub AToH(buffer: [uint8]): (result: uint16) is
+	var c: uint8 := [buffer];
+
+	result := 0;
+
+	loop
+		if c >= '0' and c <= '9' then
+			c := c - '0';
+		elseif c >= 'A' and c <= 'F' then
+			c := c - 'A' + 10;
+		elseif c >= 'a' and c <= 'f' then
+			c := c - 'a' + 10;
+		else
+			break;
+		end if;
+
+		result := result * 16 + (c as uint16);
+		buffer := buffer + 1;
+		c := [buffer];
+	end loop;
+end sub;
+
+ArgvInit();
+
+var FileName: [uint8] := ArgvNext();
+if FileName == (0 as [uint8]) then
+	print("usage: cowdis file.com [addr]\n");
+	ExitWithError();
+end if;
+
+if FCBOpenIn(&InputFile, FileName) != 0 then
+	print("cowdis: cannot open ");
+	print(FileName);
+	print("\n");
+	ExitWithError();
+end if;
+
+addr := AToH(ArgvNext());
+if addr < 0 then
+	addr := 0;
+end if;
+
+pc := addr as uint16;
+len := FCBExt(&InputFile);
+
+if (addr > len as uint16) then
+	Exit();
+end if;
+
+# FCBSeek might not always be correct?
+while (addr > 0) loop
+	byte := FCBGetChar(&InputFile);
+	addr := addr - 1;
+end loop;
+
+#print(FileName);
+#print(":\n");
+
+var count: uint32 := 7;
+while (pc as uint32 < len) and (count > 0) loop
+	pc := pc + Disassemble();
+	count := count - 1;
+end loop;
+
+if FCBClose(&InputFile) != 0 then
+	ExitWithError();
+end if;
