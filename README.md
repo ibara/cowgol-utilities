@@ -11,7 +11,7 @@ the CP/M backend. They should work on all supported Cowgol systems.
 Utilities list
 --------------
 * bfc.cow: Brainfuck to Cowgol transpiler
-# cowdis.cow: Intel 8080 disassembler
+* cowdis.cow: Intel 8080 disassembler
 * hexdump.cow: Hexdump utility
 
 License
