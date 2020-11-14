@@ -29,7 +29,6 @@ sub Compile() is
 	var c: uint8 := FCBGetChar(&InputFile);
 
 	case c is
-		when 0: ;
 		when '<': FCBPutString(&OutputFile, "index := index - 1;\n");
 		when '>': FCBPutString(&OutputFile, "index := index + 1;\n");
 		when '+': FCBPutString(&OutputFile, "Array[index] := Array[index] + 1;\n");
