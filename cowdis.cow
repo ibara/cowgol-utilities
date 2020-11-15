@@ -680,7 +680,13 @@ if FCBOpenIn(&InputFile, FileName) != 0 then
 	ExitWithError();
 end if;
 
-addr := AToH(ArgvNext());
+var argp: [uint8] := ArgvNext();
+if argp == (0 as [uint8]) then
+	addr := 0;
+else
+	addr := AToH(argp);
+end if;
+
 if addr < 0 then
 	addr := 0;
 end if;
