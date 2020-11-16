@@ -669,7 +669,7 @@ ArgvInit();
 
 var FileName: [uint8] := ArgvNext();
 if FileName == (0 as [uint8]) then
-	print("usage: cowdis file.com [offset] [count]\n");
+	print("usage: cowdis file [offset] [count]\n");
 	ExitWithError();
 end if;
 

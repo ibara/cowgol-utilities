@@ -1,0 +1,80 @@
+.\"
+.\" cowdis - Intel 8080 disassembler
+.\"
+.\" Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd November 16, 2020
+.Dt COWDIS 1
+.Os
+.Sh NAME
+.Nm cowdis
+.Nd Intel 8080 disassembler
+.Sh SYNOPSIS
+.Nm
+.Ar file
+.Op Ar offset
+.Op Ar count
+.Sh DESCRIPTION
+.Nm
+is a disassembler for the Intel 8080 CPU.
+It reads in an Intel 8080 executable
+.Ar file
+and outputs the assembly instructions of that executable to
+.Ar stdout .
+.Pp
+If
+.Ar offset
+is issued on the command line, disassembly begins at that memory
+location.
+The
+.Ar offset
+argument is understood as hexadecimal.
+Defaults to 0.
+.Pp
+If
+.Ar count
+is issued on the command line, print that many lines of instructions.
+The
+.Ar count
+argument is understood as hexadecimal.
+Defaults to 7.
+.Sh EXIT STATUS
+The
+.Nm
+utility exits 0 on success, and >0 if an error occurs.
+.Sh EXAMPLES
+Read an Intel 8080 executable named
+.Ar hello.com ,
+begin at offset
+.Ar 0x100 ,
+and print
+.Ar 11
+instructions.
+.Pp
+.Dl cowdis hello.com 100 b
+.Sh AUTHORS
+.Nm
+was written by
+.An Brian Callahan Aq Mt bcallah@openbsd.org .
+.Sh CAVEATS
+The
+.Ar count
+argument cannot be issued unless the
+.Ar offset
+argument is also issued.
+.Sh BUGS
+.Nm
+does not take into account loading locations.
+This means for typical CP/M executables the 100h offset is ignored.
