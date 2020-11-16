@@ -10,6 +10,7 @@ CP/M backend. They should work on all supported Cowgol systems.
 
 Utilities list
 --------------
+* bin2hex.cow: Binary to Intel HEX converter
 * bfc.cow: Brainfuck to Cowgol transpiler
 * cowdis.cow: Intel 8080 disassembler
 * hexdump.cow: Hexdump utility

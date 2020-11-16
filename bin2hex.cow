@@ -1,0 +1,150 @@
+# Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
+# Binary to Intel HEX converter
+
+include "cowgol.coh";
+include "argv.coh";
+include "file.coh";
+
+var InputFile: FCB;
+var OutputFile: FCB;
+
+var addr: uint16 := 0;
+var len: uint32;
+
+sub printf_i8(value: uint8) is
+	var i: uint8 := 2;
+
+	loop
+		var digit := value >> 4;
+
+		if digit < 10 then
+			digit := digit + '0';
+		else
+			digit := digit + ('A' - 10);
+		end if;
+
+		FCBPutChar(&OutputFile, digit);
+
+		value := value << 4;
+
+		i := i - 1;
+		if i == 0 then
+			break;
+		end if;
+	end loop;
+end sub;
+
+sub printf_i16(value: uint16) is
+	printf_i8((value >> 8) as uint8);
+	printf_i8(value as uint8);
+end sub;
+
+sub Translate() is
+	var c: uint8;
+	var i: uint8 := 0;
+	var rec: uint8[16];
+	var sum: uint32 := 0;
+
+	while i < 16 loop
+		rec[i] := 0;
+		i := i + 1;
+	end loop;
+
+	i := 0;
+
+	while i < 16 loop
+		if len == 0 then
+			break;
+		end if;
+
+		c := FCBGetChar(&InputFile);
+		len := len - 1;
+
+		rec[i] := c;
+		sum := sum + (c as uint32);
+
+		i := i + 1;
+	end loop;
+
+	sum := -(sum + (i as uint32) + ((addr as uint32) >> 8) + (addr as uint32));
+
+	if i > 0 then
+		FCBPutChar(&OutputFile, ':');
+		printf_i8(i);
+		printf_i16(addr);
+		FCBPutString(&OutputFile, "00");
+		c := 0;
+		while c < i loop
+			printf_i8(rec[c]);
+			c := c + 1;
+		end loop;
+		printf_i8((sum as uint8));
+		FCBPutChar(&OutputFile, '\n');
+
+		addr := addr + 16;
+	end if;
+end sub;
+
+ArgvInit();
+
+var InName: [uint8] := ArgvNext();
+if InName == (0 as [uint8]) then
+	print("usage: bin2hex file.com file.hex\n");
+	ExitWithError();
+end if;
+
+if FCBOpenIn(&InputFile, InName) != 0 then
+	print("bin2hex: cannot open ");
+	print(InName);
+	print("\n");
+	ExitWithError();
+end if;
+
+var OutName: [uint8] := ArgvNext();
+if OutName == (0 as [uint8]) then
+	print("usage: bin2hex file.com file.hex\n");
+	ExitWithError();
+end if;
+
+if FCBOpenOut(&OutputFile, OutName) != 0 then
+	print("bin2hex: cannot open ");
+	print(OutName);
+	print("\n");
+	if FCBClose(&InputFile) != 0 then
+		ExitWithError();
+	end if;
+	ExitWithError();
+end if;
+
+len := FCBExt(&InputFile);
+while len > 0 loop 
+	Translate();
+end loop;
+
+FCBPutChar(&OutputFile, ':');
+FCBPutString(&OutputFile, "00");
+FCBPutString(&OutputFile, "0000");
+FCBPutString(&OutputFile, "01");
+FCBPutString(&OutputFile, "FF");
+FCBPutChar(&OutputFile, '\n');
+
+if FCBClose(&OutputFile) != 0 then
+	ExitWithError();
+end if;
+
+if FCBClose(&InputFile) != 0 then
+	ExitWithError();
+end if;
