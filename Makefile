@@ -55,3 +55,5 @@ clean:
 
 clean-8080:
 	rm -f bfc.com bin2hex.com cowdis.com hexdump.com
+
+clean-all: clean clean-8080
