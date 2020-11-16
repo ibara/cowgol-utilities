@@ -64,6 +64,6 @@ clean:
 	rm -f bfc bin2hex cat cowdis hexdump
 
 clean-8080:
-	rm -f bfc.com bin2hex.com cat-8080.com cowdis.com hexdump.com
+	rm -f bfc.com bin2hex.com cat.com cowdis.com hexdump.com
 
 clean-all: clean clean-8080
