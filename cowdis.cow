@@ -23,6 +23,7 @@ var addr: uint16;
 var len: uint32;
 var pc: uint16;
 var byte: uint8;
+var count: uint16 := 7;
 
 sub OneByte(inst: [uint8], reg: [uint8]) is
 	print_hex_i8(byte);
@@ -668,7 +669,7 @@ ArgvInit();
 
 var FileName: [uint8] := ArgvNext();
 if FileName == (0 as [uint8]) then
-	print("usage: cowdis file.com [offset]\n");
+	print("usage: cowdis file.com [offset] [count]\n");
 	ExitWithError();
 end if;
 
@@ -684,6 +685,11 @@ if argp == (0 as [uint8]) then
 	addr := 0;
 else
 	addr := AToH(argp);
+
+	argp := ArgvNext();
+	if argp != (0 as [uint8]) then
+		count := AToH(argp);
+	end if;
 end if;
 
 if addr < 0 then
@@ -703,7 +709,6 @@ while (addr > 0) loop
 	addr := addr - 1;
 end loop;
 
-var count: uint32 := 7;
 while (pc as uint32 < len) and (count > 0) loop
 	pc := pc + Disassemble();
 	count := count - 1;
