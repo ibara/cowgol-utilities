@@ -682,7 +682,7 @@ end if;
 
 var argp: [uint8] := ArgvNext();
 if argp == (0 as [uint8]) then
-	addr := 0;
+	addr := 0x100;
 else
 	addr := AToH(argp);
 
@@ -692,8 +692,8 @@ else
 	end if;
 end if;
 
-if addr < 0 then
-	addr := 0;
+if addr < 0x100 then
+	addr := 0x100;
 end if;
 
 pc := addr as uint16;
@@ -704,7 +704,7 @@ if (addr > len as uint16) then
 end if;
 
 # FCBSeek might not always be correct?
-while (addr > 0) loop
+while (addr > 0x100) loop
 	byte := FCBGetChar(&InputFile);
 	addr := addr - 1;
 end loop;
