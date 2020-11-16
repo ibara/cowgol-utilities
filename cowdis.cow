@@ -14,9 +14,8 @@
 
 # 8080 disassembler
 
-include "cowgol.coh";
+include "stdcow.coh";
 include "argv.coh";
-include "file.coh";
 
 var InputFile: FCB;
 

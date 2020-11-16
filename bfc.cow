@@ -15,9 +15,8 @@
 # Brainfuck to Cowgol transpiler
 # XXX: Comma operator not yet implemented; no cross-platform input?
 
-include "cowgol.coh";
+include "stdcow.coh";
 include "argv.coh";
-include "file.coh";
 
 var InputFile: FCB;
 var OutputFile: FCB;

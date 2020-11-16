@@ -15,9 +15,8 @@
 # Clone of Unix hexdump -C
 # Should work on all Cowgol systems
 
-include "cowgol.coh";
+include "stdcow.coh";
 include "argv.coh";
-include "file.coh";
 
 var InputFile: FCB;
 

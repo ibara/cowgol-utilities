@@ -15,6 +15,12 @@ Utilities list
 * cowdis.cow: Intel 8080 disassembler
 * hexdump.cow: Hexdump utility
 
+stdcow
+------
+These utilties use stdcow, my standard library for Cowgol.
+If you'd like to make changes to `stdcow.coh`, please submit those
+changes to the [stdcow repository](https://github.com/ibara/stdcow).
+
 License
 -------
 ISC License. See individual files for more details.

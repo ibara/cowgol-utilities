@@ -14,43 +14,14 @@
 
 # Binary to Intel HEX converter
 
-include "cowgol.coh";
+include "stdcow.coh";
 include "argv.coh";
-include "file.coh";
 
 var InputFile: FCB;
 var OutputFile: FCB;
 
 var addr: uint16 := 0;
 var len: uint32;
-
-sub printf_i8(value: uint8) is
-	var i: uint8 := 2;
-
-	loop
-		var digit := value >> 4;
-
-		if digit < 10 then
-			digit := digit + '0';
-		else
-			digit := digit + ('A' - 10);
-		end if;
-
-		FCBPutChar(&OutputFile, digit);
-
-		value := value << 4;
-
-		i := i - 1;
-		if i == 0 then
-			break;
-		end if;
-	end loop;
-end sub;
-
-sub printf_i16(value: uint16) is
-	printf_i8((value >> 8) as uint8);
-	printf_i8(value as uint8);
-end sub;
 
 sub Translate() is
 	var c: uint8;
@@ -83,15 +54,15 @@ sub Translate() is
 
 	if i > 0 then
 		FCBPutChar(&OutputFile, ':');
-		printf_i8(i);
-		printf_i16(addr);
+		FCBPutHex8(&OutputFile, i);
+		FCBPutHex16(&OutputFile, addr);
 		FCBPutString(&OutputFile, "00");
 		c := 0;
 		while c < i loop
-			printf_i8(rec[c]);
+			FCBPutHex8(&OutputFile, rec[c]);
 			c := c + 1;
 		end loop;
-		printf_i8((sum as uint8));
+		FCBPutHex8(&OutputFile, (sum as uint8));
 		FCBPutChar(&OutputFile, '\n');
 
 		addr := addr + 16;
