@@ -36,8 +36,8 @@ and outputs the assembly instructions of that executable to
 .Pp
 If
 .Ar offset
-is issued on the command line, disassembly begins at that memory
-location.
+is issued on the command line, disassembly begins at the memory
+offset specified.
 The
 .Ar offset
 argument is understood as hexadecimal.
@@ -61,9 +61,14 @@ begin at offset
 .Ar 0x100 ,
 and print
 .Ar 11
-instructions.
+instructions:
 .Pp
 .Dl cowdis hello.com 100 b
+.Pp
+Print the entire disassembly of
+.Ar hello.com :
+.Pp
+.Dl cowdis hello.com 0 ffff
 .Sh AUTHORS
 .Nm
 was written by
