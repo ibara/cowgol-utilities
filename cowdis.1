@@ -24,8 +24,8 @@
 .Sh SYNOPSIS
 .Nm
 .Ar file
-.Op Ar offset
 .Op Ar count
+.Op Ar offset
 .Sh DESCRIPTION
 .Nm
 is a disassembler for the Intel 8080 CPU.
@@ -35,21 +35,21 @@ and outputs the assembly instructions of that executable to
 .Ar stdout .
 .Pp
 If
-.Ar offset
-is issued on the command line, disassembly begins at the memory
-offset specified.
-The
-.Ar offset
-argument is understood as hexadecimal.
-Defaults to 0.
-.Pp
-If
 .Ar count
 is issued on the command line, print that many lines of instructions.
 The
 .Ar count
 argument is understood as hexadecimal.
 Defaults to 7.
+.Pp
+If
+.Ar offset
+is issued on the command line, disassembly begins at the memory
+offset specified.
+The
+.Ar offset
+argument is understood as hexadecimal.
+Defaults to 100h.
 .Sh EXIT STATUS
 The
 .Nm
@@ -57,18 +57,17 @@ utility exits 0 on success, and >0 if an error occurs.
 .Sh EXAMPLES
 Read an Intel 8080 executable named
 .Ar hello.com ,
-begin at offset
-.Ar 0x100 ,
-and print
+print
 .Ar 11
-instructions:
+instructions, and begin at offset
+.Ar 200h :
 .Pp
-.Dl cowdis hello.com 100 b
+.Dl cowdis hello.com b 200
 .Pp
 Print the entire disassembly of
 .Ar hello.com :
 .Pp
-.Dl cowdis hello.com 0 ffff
+.Dl cowdis hello.com ffff
 .Sh AUTHORS
 .Nm
 was written by
@@ -80,5 +79,10 @@ argument cannot be issued unless the
 .Ar offset
 argument is also issued.
 .Sh BUGS
+If the user specifies an incorrect
+.Ar offset ,
 .Nm
-hardcodes a 100h offset for all executables.
+will display addresses that will be incorrect.
+The default
+.Ar offset
+will work for most standard CP/M binaries.

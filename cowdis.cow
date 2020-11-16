@@ -19,7 +19,7 @@ include "argv.coh";
 
 var InputFile: FCB;
 
-var addr: uint16;
+var addr: uint16 := 0x100;
 var len: uint32;
 var pc: uint16;
 var byte: uint8;
@@ -669,7 +669,7 @@ ArgvInit();
 
 var FileName: [uint8] := ArgvNext();
 if FileName == (0 as [uint8]) then
-	print("usage: cowdis file [offset] [count]\n");
+	print("usage: cowdis file [count] [offset]\n");
 	ExitWithError();
 end if;
 
@@ -681,19 +681,13 @@ if FCBOpenIn(&InputFile, FileName) != 0 then
 end if;
 
 var argp: [uint8] := ArgvNext();
-if argp == (0 as [uint8]) then
-	addr := 0x100;
-else
-	addr := AToH(argp);
+if argp != (0 as [uint8]) then
+	count := AToH(argp);
 
 	argp := ArgvNext();
 	if argp != (0 as [uint8]) then
-		count := AToH(argp);
+		addr := AToH(argp);
 	end if;
-end if;
-
-if addr < 0x100 then
-	addr := 0x100;
 end if;
 
 pc := addr as uint16;
