@@ -13,7 +13,7 @@ Utilities list
 * bin2hex.cow: Binary to Intel HEX converter
 * bfc.cow: Brainfuck to Cowgol transpiler
 * cat.cow: Clone of Unix cat(1) utility
-* cowdis.cow: Intel 8080 disassembler
+* dis8080.cow: Intel 8080 disassembler
 * hexdump.cow: Hexdump utility
 
 stdcow

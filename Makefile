@@ -6,9 +6,9 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-all: bfc bin2hex cat cowdis hexdump
+all: bfc bin2hex cat dis8080 hexdump
 
-all-8080: bfc-8080 bin2hex-8080 cat-8080 cowdis-8080 hexdump-8080
+all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080
 
 bfc:
 	cowgolc bfc.cow
@@ -40,15 +40,15 @@ cat-8080:
 	cowasm-8080.nncgen.exe -o cat.com cat.asm
 	rm -f cat.cob cat.coo cat.asm
 
-cowdis:
-	cowgolc cowdis.cow
+dis8080:
+	cowgolc dis8080.cow
 
-cowdis-8080:
-	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ cowdis.cow cowdis.cob
-	cowbe-8080.nncgen.exe cowdis.cob cowdis.coo
-	cowlink-8080.nncgen.exe -o cowdis.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo cowdis.coo
-	cowasm-8080.nncgen.exe -o cowdis.com cowdis.asm
-	rm -f cowdis.cob cowdis.coo cowdis.asm
+dis8080-8080:
+	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ dis8080.cow dis8080.cob
+	cowbe-8080.nncgen.exe dis8080.cob dis8080.coo
+	cowlink-8080.nncgen.exe -o dis8080.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo dis8080.coo
+	cowasm-8080.nncgen.exe -o dis8080.com dis8080.asm
+	rm -f dis8080.cob dis8080.coo dis8080.asm
 
 hexdump:
 	cowgolc hexdump.cow
@@ -61,9 +61,9 @@ hexdump-8080:
 	rm -f hexdump.cob hexdump.coo hexdump.asm
 
 clean:
-	rm -f bfc bin2hex cat cowdis hexdump
+	rm -f bfc bin2hex cat dis8080 hexdump
 
 clean-8080:
-	rm -f bfc.com bin2hex.com cat.com cowdis.com hexdump.com
+	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com
 
 clean-all: clean clean-8080

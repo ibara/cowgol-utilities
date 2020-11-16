@@ -1,5 +1,5 @@
 .\"
-.\" cowdis - Intel 8080 disassembler
+.\" dis8080 - Intel 8080 disassembler
 .\"
 .\" Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
 .\"
@@ -16,10 +16,10 @@
 .\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 .\"
 .Dd November 16, 2020
-.Dt COWDIS 1
+.Dt DIS8080 1
 .Os
 .Sh NAME
-.Nm cowdis
+.Nm dis8080
 .Nd Intel 8080 disassembler
 .Sh SYNOPSIS
 .Nm
@@ -62,12 +62,12 @@ print
 instructions, and begin at offset
 .Ar 200h :
 .Pp
-.Dl cowdis hello.com b 200
+.Dl dis8080 hello.com b 200
 .Pp
 Print the entire disassembly of
 .Ar hello.com :
 .Pp
-.Dl cowdis hello.com ffff
+.Dl dis8080 hello.com ffff
 .Sh AUTHORS
 .Nm
 was written by
