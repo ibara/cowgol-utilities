@@ -65,7 +65,7 @@ end sub;
 
 sub Calculate(op: uint8) is
 	var t: int32 := Pop();
-	var zero: [uint8] := "divide by zero\n";
+	var zero: [uint8] := "rpn: divide by zero\n";
 
 	case op is
 		when '+':
