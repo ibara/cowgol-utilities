@@ -6,9 +6,9 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-all: bfc bin2hex cat dis8080 hexdump
+all: bfc bin2hex cat dis8080 hexdump rpn
 
-all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080
+all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080 rpn-8080
 
 bfc:
 	cowgolc bfc.cow
@@ -60,10 +60,20 @@ hexdump-8080:
 	cowasm-8080.nncgen.exe -o hexdump.com hexdump.asm
 	rm -f hexdump.cob hexdump.coo hexdump.asm
 
+rpn:
+	cowgolc rpn.cow
+
+rpn-8080:
+	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rpn.cow rpn.cob
+	cowbe-8080.nncgen.exe rpn.cob rpn.coo
+	cowlink-8080.nncgen.exe -o rpn.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rpn.coo
+	cowasm-8080.nncgen.exe -o rpn.com rpn.asm
+	rm -f rpn.cob rpn.coo rpn.asm
+
 clean:
-	rm -f bfc bin2hex cat dis8080 hexdump
+	rm -f bfc bin2hex cat dis8080 hexdump rpn
 
 clean-8080:
-	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com
+	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rpn.com
 
 clean-all: clean clean-8080

@@ -1,0 +1,130 @@
+#
+# Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+# Reverse Polish notation calculator
+
+include "stdcow.coh";
+include "argv.coh";
+
+var stack: int32[512];
+var i: int16;
+
+sub Process(buffer: [uint8]): (result: int32) is
+	var c: uint8 := [buffer];
+
+	result := 0;
+
+	loop
+		if c >= '0' and c <= '9' then
+			c := c - '0';
+		else
+			break;
+		end if;
+
+		result := result * 10 + (c as int32);
+
+		buffer := buffer + 1;
+		c := [buffer];
+	end loop;
+end sub;
+
+sub Push(entry: int32) is
+	if i > 511 then
+		print("rpn: stack exhausted\n");
+		ExitWithError();
+	end if;
+
+	stack[(i as uint16)] := entry;
+
+	i := i + 1;
+end sub;
+
+sub Pop(): (entry: int32) is
+	i := i - 1;
+
+	if i < 0 then
+		print("rpn: stack underflow\n");
+		ExitWithError();
+	end if;
+
+	entry := stack[(i as uint16)];
+end sub;
+
+sub Calculate(op: uint8) is
+	var t: int32 := Pop();
+	var zero: [uint8] := "divide by zero\n";
+
+	case op is
+		when '+':
+			Push(Pop() + t);
+		when '-':
+			Push(Pop() - t);
+		when 'X':
+			Push(Pop() * t);
+		when 'x':
+			Push(Pop() * t);
+		when '/':
+			if t == 0 then
+				print(zero);
+				ExitWithError();
+			end if;
+			Push(Pop() / t);
+		when '%':
+			if t == 0 then
+				print(zero);
+				ExitWithError();
+			end if;
+			Push(Pop() % t);
+	end case;
+end sub;
+
+ArgvInit();
+
+loop
+	var p: [uint8] := ArgvNext();
+
+	if p == (0 as [uint8]) then
+		break;
+	end if;
+
+	var c: uint8 := [p];
+	if c >= '0' and c <= '9' then
+		Push(Process(p));
+	elseif c == '+' then
+		Calculate(c);
+	elseif c == '-' then
+		Calculate(c);
+	elseif c == 'X' then
+		Calculate(c);
+	elseif c == 'x' then
+		Calculate(c);
+	elseif c == '/' then
+		Calculate(c);
+	elseif c == '%' then
+		Calculate(c);
+	else
+		print("rpn: invalid entry\n");
+		ExitWithError();
+	end if;
+end loop;
+
+if i != 1 then
+	print("rpn: incomplete expression\n");
+	ExitWithError();
+end if;
+
+print_d32(stack[0]);
+print_char('\n');

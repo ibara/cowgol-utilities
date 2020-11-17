@@ -15,6 +15,7 @@ Utilities list
 * cat.cow: Clone of Unix cat(1) utility
 * dis8080.cow: Intel 8080 disassembler
 * hexdump.cow: Hexdump utility
+* rpn.cow: Reverse Polish notation calculator
 
 stdcow
 ------

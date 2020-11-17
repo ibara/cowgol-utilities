@@ -52,3 +52,10 @@ sub FCBPutHex32(fcb: [FCB], number: uint32) is
 	FCBPutHex16(fcb, ((number >> 16) as uint16));
 	FCBPutHex16(fcb, (number as uint16));
 end sub;
+
+# Print a signed 32-bit integer to the console.
+sub print_d32(value: int32) is
+	var buffer: uint8[12];
+	var pe := IToA(value, 10, &buffer[0]);
+	print(&buffer[0]);
+end sub;
