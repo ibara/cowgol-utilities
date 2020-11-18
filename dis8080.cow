@@ -673,12 +673,12 @@ ArgvInit();
 
 var FileName: [uint8] := ArgvNext();
 if FileName == (0 as [uint8]) then
-	print("usage: cowdis file [count] [offset] [loadaddr]\n");
+	print("usage: dis8080 file [count] [offset] [loadaddr]\n");
 	ExitWithError();
 end if;
 
 if FCBOpenIn(&InputFile, FileName) != 0 then
-	print("cowdis: cannot open ");
+	print("dis8080: cannot open ");
 	print(FileName);
 	print("\n");
 	ExitWithError();
