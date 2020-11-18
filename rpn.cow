@@ -103,21 +103,18 @@ loop
 	var c: uint8 := [p];
 	if c >= '0' and c <= '9' then
 		Push(Process(p));
-	elseif c == '+' then
-		Calculate(c);
-	elseif c == '-' then
-		Calculate(c);
-	elseif c == 'X' then
-		Calculate(c);
-	elseif c == 'x' then
-		Calculate(c);
-	elseif c == '/' then
-		Calculate(c);
-	elseif c == '%' then
-		Calculate(c);
 	else
-		print("rpn: invalid entry\n");
-		ExitWithError();
+		case c is
+			when '+': Calculate(c);
+			when '-': Calculate(c);
+			when 'X': Calculate(c);
+			when 'x': Calculate(c);
+			when '/': Calculate(c);
+			when '%': Calculate(c);
+			when else:
+				print("rpn: invalid entry\n");
+				ExitWithError();
+		end case;
 	end if;
 end loop;
 
