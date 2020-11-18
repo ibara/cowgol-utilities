@@ -21,11 +21,13 @@ include "argv.coh";
 
 var InputFile: FCB;
 
-var addr: uint16 := 0x100;
+var count: uint16 := 15;
+var offset: uint16 := 0;
+var loadaddr: uint16 := 0x100;
+
 var len: uint32;
 var pc: uint16;
 var byte: uint8;
-var count: uint16 := 15;
 
 sub OneByte(inst: [uint8], reg: [uint8]) is
 	print_hex_i8(byte);
@@ -671,7 +673,7 @@ ArgvInit();
 
 var FileName: [uint8] := ArgvNext();
 if FileName == (0 as [uint8]) then
-	print("usage: cowdis file [count] [offset]\n");
+	print("usage: cowdis file [count] [offset] [loadaddr]\n");
 	ExitWithError();
 end if;
 
@@ -688,24 +690,29 @@ if argp != (0 as [uint8]) then
 
 	argp := ArgvNext();
 	if argp != (0 as [uint8]) then
-		addr := AToH(argp);
+		offset := AToH(argp);
+
+		argp := ArgvNext();
+		if argp != (0 as [uint8]) then
+			loadaddr := AToH(argp);
+		end if;
 	end if;
 end if;
 
-pc := addr as uint16;
+pc := ((loadaddr + offset) as uint16);
 len := FCBExt(&InputFile);
 
-if (addr > len as uint16) then
+if (loadaddr + offset) > (len as uint16) then
 	Exit();
 end if;
 
 # FCBSeek might not always be correct?
-while (addr > 0x100) loop
+while (offset > 0) loop
 	byte := FCBGetChar(&InputFile);
-	addr := addr - 1;
+	offset := offset - 1;
 end loop;
 
-while (pc as uint32 < len) and (count > 0) loop
+while (pc as uint32) < len and count > 0 loop
 	pc := pc + Disassemble();
 	count := count - 1;
 end loop;

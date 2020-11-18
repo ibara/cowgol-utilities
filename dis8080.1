@@ -26,6 +26,7 @@
 .Ar file
 .Op Ar count
 .Op Ar offset
+.Op Ar loadaddr
 .Sh DESCRIPTION
 .Nm
 is a disassembler for the Intel 8080 CPU.
@@ -44,10 +45,21 @@ Defaults to 7.
 .Pp
 If
 .Ar offset
-is issued on the command line, disassembly begins at the memory
-offset specified.
+is issued on the command line, disassembly begins at
+.Ar offset
+bytes from the
+.Ar loadaddr .
 The
 .Ar offset
+argument is understood as hexadecimal.
+Defaults to 0.
+.Pp
+If
+.Ar loadaddr
+is issued on the command line, set the binary's load address to
+.Ar loadaddr .
+The
+.Ar loadaddr
 argument is understood as hexadecimal.
 Defaults to 100h.
 .Sh EXIT STATUS
@@ -59,10 +71,12 @@ Read an Intel 8080 executable named
 .Ar hello.com ,
 print
 .Ar 11
-instructions, and begin at offset
+instructions, offset the first instruction printed by
+.Ar 300h ,
+and set the binary's load address to
 .Ar 200h :
 .Pp
-.Dl dis8080 hello.com b 200
+.Dl dis8080 hello.com b 300 200
 .Pp
 Print the entire disassembly of
 .Ar hello.com :
@@ -74,15 +88,21 @@ was written by
 .An Brian Callahan Aq Mt bcallah@openbsd.org .
 .Sh CAVEATS
 The
+.Ar offset
+argument cannot be issued unless the
 .Ar count
+argument is also issued.
+.Pp
+The
+.Ar loadaddr
 argument cannot be issued unless the
 .Ar offset
 argument is also issued.
 .Sh BUGS
 If the user specifies an incorrect
-.Ar offset ,
-.Nm
-will display addresses that will be incorrect.
-The default
 .Ar offset
-will work for most standard CP/M binaries.
+and/or
+.Ar loadaddr ,
+.Nm
+will display addresses and/or instructions that will be incorrect.
+The default values for both will work for most standard CP/M binaries.
