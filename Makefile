@@ -6,13 +6,13 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-all: bfc bin2hex cat dis8080 hexdump rpn
+all: bfc bin2hex cat dis8080 hexdump rng rpn
 
-all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080 rpn-8080
+all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080 rng-8080 rpn-8080
 
-all-8086: bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 hexdump-8086 rpn-8086
+all-8086: bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 hexdump-8086 rng-8080 rpn-8086
 
-all-z80: bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 hexdump-z80 rpn-z80
+all-z80: bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 hexdump-z80 rng-z80 rpn-z80
 
 all-all: all all-8080 all-8086 all-z80
 
@@ -143,6 +143,23 @@ hexdump-z80:
 	zmac -j -m -z -o hexdump.cim hexdump.asm
 	rm -f hexdump.cob hexdump.coo hexdump.asm
 
+rng:
+	cowgolc rng.cow
+
+rng-8080:
+	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rng.cow rng.cob
+	cowbe-8080.nncgen.exe rng.cob rng.coo
+	cowlink-8080.nncgen.exe -o rng.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rng.coo
+	cowasm-8080.nncgen.exe -o rng.com rng.asm
+	rm -f rng.cob rng.coo rng.asm
+
+rng-8086:
+	cowfe-8086.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rng.cow rng.cob
+	cowbe-8086.nncgen.exe rng.cob rng.coo
+	cowlink-8086.nncgen.exe -o rng.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rng.coo
+	cowasm-8086.nncgen.exe -o rng.com rng.asm
+	rm -f rng.cob rng.coo rng.asm
+
 rpn:
 	cowgolc rpn.cow
 
@@ -168,17 +185,17 @@ rpn-z80:
 	rm -f rpn.cob rpn.coo rpn.asm
 
 clean:
-	rm -f bfc bin2hex cat dis8080 hexdump rpn
-	rm -f bfc.coo bin2hex.coo cat.coo dis8080.coo hexdump.coo rpn.coo
-	rm -f bfc.cob bin2hex.cob cat.cob dis8080.cob hexdump.cob rpn.cob
+	rm -f bfc bin2hex cat dis8080 hexdump rng rpn
+	rm -f bfc.coo bin2hex.coo cat.coo dis8080.coo hexdump.coo rng.coo rpn.coo
+	rm -f bfc.cob bin2hex.cob cat.cob dis8080.cob hexdump.cob rng.cob rpn.cob
 
 clean-8080:
-	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rpn.com
+	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rng.com rpn.com
 
 clean-8086:
-	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rpn.com
+	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rng.com rpn.com
 
 clean-z80:
-	rm -f bfc.cim bin2hex.cim cat.cim dis8080.cim hexdump.cim rpn.cim
+	rm -f bfc.cim bin2hex.cim cat.cim dis8080.cim hexdump.cim rng.cim rpn.cim
 
 clean-all: clean clean-8080 clean-8086 clean-z80
