@@ -19,8 +19,10 @@
 include "stdcow.coh";
 include "argv.coh";
 
-var stack: int32[512];
-var i: int16;
+var input: uint8[11];
+
+var stack: int32[4];
+var depth: int8 := 0;
 
 sub Process(buffer: [uint8]): (result: int32) is
 	var c: uint8 := [buffer];
@@ -42,86 +44,153 @@ sub Process(buffer: [uint8]): (result: int32) is
 end sub;
 
 sub Push(entry: int32) is
-	if i > 511 then
-		print("rpn: stack exhausted\n");
-		ExitWithError();
+	if depth < 0 then
+		depth := 0;
 	end if;
+	stack[(depth as uint8)] := entry;
+	depth := depth + 1;
 
-	stack[(i as uint16)] := entry;
-
-	i := i + 1;
+	if depth > 3 then
+		depth := 4;
+	end if;
 end sub;
 
 sub Pop(): (entry: int32) is
-	i := i - 1;
-
-	if i < 0 then
-		print("rpn: stack underflow\n");
-		ExitWithError();
+	depth := depth - 1;
+	if depth < 0 then
+		depth := -1;
+		entry := stack[0];
+		stack[0] := 0;
+	else
+		entry := stack[(depth as uint8)];
+		stack[(depth as uint8)] := 0;
 	end if;
+end sub;
 
-	entry := stack[(i as uint16)];
+sub Clear() is
+	stack[0] := 0;
+	stack[1] := 0;
+	stack[2] := 0;
+	stack[3] := 0;
+	depth := 0;
 end sub;
 
 sub Calculate(op: uint8) is
 	var t: int32 := Pop();
-	var zero: [uint8] := "rpn: divide by zero\n";
 
 	case op is
 		when '+':
 			Push(Pop() + t);
 		when '-':
 			Push(Pop() - t);
-		when 'X':
-			Push(Pop() * t);
-		when 'x':
+		when '*':
 			Push(Pop() * t);
 		when '/':
 			if t == 0 then
-				print(zero);
-				ExitWithError();
+				t := Pop();
+				print("?\n");
+			else
+				Push(Pop() / t);
 			end if;
-			Push(Pop() / t);
 		when '%':
 			if t == 0 then
-				print(zero);
-				ExitWithError();
+				t := Pop();
+				print("?\n");
+			else
+				Push(Pop() % t);
 			end if;
-			Push(Pop() % t);
 	end case;
 end sub;
 
-ArgvInit();
+sub GetInput() is
+	var c: uint8;
+	var count: uint8 := 0;
+
+	while count < 11 loop
+		input[count] := 0;
+		count := count + 1;
+	end loop;
+
+	count := 0;
+
+	c := get_char();
+	if c >= '0' and c <= '9' then
+		input[count] := c;
+		loop
+			count := count + 1;
+			c := get_char();
+			if c == 13 or c == 10 then
+				break;
+			end if;
+			input[count] := c;
+			if count == 9 then
+				break;
+			end if;
+		end loop;
+		while c != 10 and c != 13 loop
+			c := get_char();
+		end loop;
+		Push(Process(&input[0]));
+	elseif c == '+' or c == '-' or c == '*' or c == '/' or c == '%' then
+		count := c;
+		while c != 10 and c != 13 loop
+			c := get_char();
+		end loop;
+		Calculate(count);
+	elseif c == 'c' then
+		while c != 10 and c != 13 loop
+			c := get_char();
+		end loop;
+		Clear();
+	elseif c == 'q' then
+		while c != 10 and c != 13 loop
+			c := get_char();
+		end loop;
+		Exit();
+	else
+		while c != 10 and c != 13 loop
+			c := get_char();
+		end loop;
+		print("?\n");
+	end if;
+end sub;
+
+sub PrintStack() is
+	print("--------------------\n");
+	if depth == 0 or depth == 1 then
+		print("*0: ");
+	else
+		print(" 0: ");
+	end if;
+	print_d32(stack[0]);
+	print_nl();
+	if depth == 2 then
+		print("*1: ");
+	else
+		print(" 1: ");
+	end if;
+	print_d32(stack[1]);
+	print_nl();
+	if depth == 3 then
+		print("*2: ");
+	else
+		print(" 2: ");
+	end if;
+	print_d32(stack[2]);
+	print_nl();
+	if depth == 4 then
+		print("*3: ");
+	else
+		print(" 3: ");
+	end if;
+	print_d32(stack[3]);
+	print_nl();
+	print_nl();
+end sub;
+
+Clear();
 
 loop
-	var p: [uint8] := ArgvNext();
-
-	if p == (0 as [uint8]) then
-		break;
-	end if;
-
-	var c: uint8 := [p];
-	if c >= '0' and c <= '9' then
-		Push(Process(p));
-	else
-		case c is
-			when '+': Calculate(c);
-			when '-': Calculate(c);
-			when 'X': Calculate(c);
-			when 'x': Calculate(c);
-			when '/': Calculate(c);
-			when '%': Calculate(c);
-			when else:
-				print("rpn: invalid entry\n");
-				ExitWithError();
-		end case;
-	end if;
+	PrintStack();
+	GetInput();
 end loop;
-
-if i != 1 then
-	print("rpn: incomplete expression\n");
-	ExitWithError();
-end if;
-
-print_d32(stack[0]);
-print_char('\n');
