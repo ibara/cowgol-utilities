@@ -133,19 +133,10 @@ sub GetInput() is
 		Push(Process(&input[0]));
 	elseif c == '+' or c == '-' or c == '*' or c == '/' or c == '%' then
 		count := c;
-		while c != 10 and c != 13 loop
-			c := get_char();
-		end loop;
 		Calculate(count);
 	elseif c == 'c' then
-		while c != 10 and c != 13 loop
-			c := get_char();
-		end loop;
 		Clear();
 	elseif c == 'q' then
-		while c != 10 and c != 13 loop
-			c := get_char();
-		end loop;
 		Exit();
 	else
 		while c != 10 and c != 13 loop
