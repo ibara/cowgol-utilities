@@ -17,8 +17,10 @@
 include "stdcow.coh";
 
 print("Type in a string and press [Enter]:\n");
-var s: uint8[128];
-GetString(&s[0], @bytesof s);
+var s: [uint8] := GetString();
 print("The string you typed is:\n");
-print(&s[0]);
+print(s);
+print_nl();
+print("The length of the string you typed is:\n");
+print_d32((StrLen(s) as int32));
 print_nl();
