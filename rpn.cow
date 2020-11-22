@@ -88,14 +88,14 @@ sub Calculate(op: uint8) is
 		when '/':
 			if t == 0 then
 				t := Pop();
-				print("?\n");
+				print("\n?\n");
 			else
 				Push(Pop() / t);
 			end if;
 		when '%':
 			if t == 0 then
 				t := Pop();
-				print("?\n");
+				print("\n?\n");
 			else
 				Push(Pop() % t);
 			end if;
@@ -142,12 +142,12 @@ sub GetInput() is
 		while c != 10 and c != 13 loop
 			c := get_char();
 		end loop;
-		print("?\n");
+		print("\n?\n");
 	end if;
 end sub;
 
 sub PrintStack() is
-	print("--------------------\n");
+	print("\n--------------------\n");
 	if depth == 0 or depth == 1 then
 		print("*0: ");
 	else
