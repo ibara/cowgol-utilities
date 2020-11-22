@@ -14,12 +14,11 @@
 # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 #
 
-# Random Number Generator
-# Requires my fork of Cowgol (for now).
-# May not have good randomness on any system not named OpenBSD.
-
 include "stdcow.coh";
-include "math.coh";
 
-Srandom(GetEntropy());
-print_d32(Random());
+print("Type in a string and press [Enter]:\n");
+var s: uint8[128];
+GetString(&s[0], @bytesof s);
+print("The string you typed is:\n");
+print(&s[0]);
+print_nl();

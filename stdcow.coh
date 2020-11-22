@@ -59,3 +59,27 @@ sub print_d32(value: int32) is
 	var pe := IToA(value, 10, &buffer[0]);
 	print(&buffer[0]);
 end sub;
+
+# Read in a string.
+sub GetString(s: [uint8], size: uint8) is
+	var c: uint8;
+	var i: uint8 := 0;
+
+	if size == 0 then
+		return;
+	end if;
+
+	while i < (size - 1) loop
+		c := get_char();
+		if c == 10 or c == 13 then
+			break;
+		end if;
+
+		[s] := c;
+		s := s + 1;
+
+		i := i + 1;
+	end loop;
+
+	[s] := 0;
+end sub;

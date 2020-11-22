@@ -6,13 +6,24 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-all: bfc bin2hex cat dis8080 hexdump rng rpn
+CGENPROG =	bfc bin2hex cat dis8080 getstring hexdump rpn
 
-all-8080: bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 hexdump-8080 rng-8080 rpn-8080
+PROG8080 =	bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 getstring-8080 \
+		hexdump-8080 rpn-8080
 
-all-8086: bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 hexdump-8086 rng-8080 rpn-8086
+PROG8086 =	bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 getstring-8086 \
+		hexdump-8086 rpn-8086
 
-all-z80: bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 hexdump-z80 rng-z80 rpn-z80
+Z80PROG =	bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 getstring-z80 \
+		hexdump-z80 rpn-z80
+
+all: ${CGENPROG}
+
+all-8080: ${PROG8080}
+
+all-8086: ${PROG8086}
+
+all-z80: ${Z80PROG}
 
 all-all: all all-8080 all-8086 all-z80
 
@@ -119,6 +130,30 @@ dis8086-8080:
 	cowasm-8080.nncgen.exe -o dis8086.com dis8086.asm
 	rm -f dis8086.cob dis8086.coo dis8086.asm
 
+getstring:
+	cowgolc getstring.cow
+
+getstring-8080:
+	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ getstring.cow getstring.cob
+	cowbe-8080.nncgen.exe getstring.cob getstring.coo
+	cowlink-8080.nncgen.exe -o getstring.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo getstring.coo
+	cowasm-8080.nncgen.exe -o getstring.com getstring.asm
+	rm -f getstring.cob getstring.coo getstring.asm
+
+getstring-8086:
+	cowfe-8086.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/msdos/ getstring.cow getstring.cob
+	cowbe-8086.nncgen.exe getstring.cob getstring.coo
+	cowlink-msdos.nncgen.exe -o getstring.asm /usr/local/share/cowgol/rt/msdos/cowgol.coo getstring.coo
+	nasm -f bin -o hexdump.com hexdump.asm
+	rm -f getstring.cob getstring.coo getstring.asm
+
+getstring-z80:
+	cowfe-z80.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpmz/ getstring.cow getstring.cob
+	cowbe-z80.nncgen.exe getstring.cob getstring.coo
+	cowlink-8080.nncgen.exe -o getstring.asm /usr/local/share/cowgol/rt/cpmz/cowgol.coo getstring.coo
+	zmac -j -m -z -o rpn.cim rpn.asm
+	rm -f getstring.cob getstring.coo getstring.asm
+
 hexdump:
 	cowgolc hexdump.cow
 
@@ -142,23 +177,6 @@ hexdump-z80:
 	cowlink-8080.nncgen.exe -o hexdump.asm /usr/local/share/cowgol/rt/cpmz/cowgol.coo hexdump.coo
 	zmac -j -m -z -o hexdump.cim hexdump.asm
 	rm -f hexdump.cob hexdump.coo hexdump.asm
-
-rng:
-	cowgolc rng.cow
-
-rng-8080:
-	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rng.cow rng.cob
-	cowbe-8080.nncgen.exe rng.cob rng.coo
-	cowlink-8080.nncgen.exe -o rng.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rng.coo
-	cowasm-8080.nncgen.exe -o rng.com rng.asm
-	rm -f rng.cob rng.coo rng.asm
-
-rng-8086:
-	cowfe-8086.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rng.cow rng.cob
-	cowbe-8086.nncgen.exe rng.cob rng.coo
-	cowlink-8086.nncgen.exe -o rng.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rng.coo
-	cowasm-8086.nncgen.exe -o rng.com rng.asm
-	rm -f rng.cob rng.coo rng.asm
 
 rpn:
 	cowgolc rpn.cow
@@ -185,17 +203,15 @@ rpn-z80:
 	rm -f rpn.cob rpn.coo rpn.asm
 
 clean:
-	rm -f bfc bin2hex cat dis8080 hexdump rng rpn
-	rm -f bfc.coo bin2hex.coo cat.coo dis8080.coo hexdump.coo rng.coo rpn.coo
-	rm -f bfc.cob bin2hex.cob cat.cob dis8080.cob hexdump.cob rng.cob rpn.cob
+	rm -f ${CGENPROG}
 
 clean-8080:
-	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rng.com rpn.com
+	rm -f *.com
 
 clean-8086:
-	rm -f bfc.com bin2hex.com cat.com dis8080.com hexdump.com rng.com rpn.com
+	rm -f *.com
 
 clean-z80:
-	rm -f bfc.cim bin2hex.cim cat.cim dis8080.cim hexdump.cim rng.cim rpn.cim
+	rm -f *.cim
 
 clean-all: clean clean-8080 clean-8086 clean-z80
