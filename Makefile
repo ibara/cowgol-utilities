@@ -151,7 +151,7 @@ getstring-z80:
 	cowfe-z80.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpmz/ getstring.cow getstring.cob
 	cowbe-z80.nncgen.exe getstring.cob getstring.coo
 	cowlink-8080.nncgen.exe -o getstring.asm /usr/local/share/cowgol/rt/cpmz/cowgol.coo getstring.coo
-	zmac -j -m -z -o rpn.cim rpn.asm
+	zmac -j -m -z -o getstring.cim getstring.asm
 	rm -f getstring.cob getstring.coo getstring.asm
 
 hexdump:

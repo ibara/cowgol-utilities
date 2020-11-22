@@ -64,11 +64,11 @@ end sub;
 
 # Read in a string.
 sub GetString(): (s: [uint8]) is
-	var temp: uint8[128];
+	var temp: uint8[256];
 	var c: uint8;
 	var i: uint8 := 0;
 
-	while i < 127 loop
+	while i < 255 loop
 		c := get_char();
 		if c == 10 or c == 13 then
 			break;
