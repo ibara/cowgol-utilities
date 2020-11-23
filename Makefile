@@ -6,16 +6,16 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-CGENPROG =	bfc bin2hex cat dis8080 getstring hexdump rpn
+CGENPROG =	bfc bin2hex cat dis8080 even getstring hexdump rpn
 
-PROG8080 =	bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 getstring-8080 \
-		hexdump-8080 rpn-8080
+PROG8080 =	bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 even-8080 \
+		getstring-8080 hexdump-8080 rpn-8080
 
-PROG8086 =	bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 getstring-8086 \
-		hexdump-8086 rpn-8086
+PROG8086 =	bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 even-8086 \
+		getstring-8086 hexdump-8086 rpn-8086
 
-Z80PROG =	bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 getstring-z80 \
-		hexdump-z80 rpn-z80
+Z80PROG =	bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 even-z80 \
+		getstring-z80 hexdump-z80 rpn-z80
 
 all: ${CGENPROG}
 
@@ -129,6 +129,29 @@ dis8086-8080:
 	cowlink-8080.nncgen.exe -o dis8086.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo dis8086.coo
 	cowasm-8080.nncgen.exe -o dis8086.com dis8086.asm
 	rm -f dis8086.cob dis8086.coo dis8086.asm
+
+even:
+	cowgolc even.cow
+
+even-8080:
+	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ even.cow even.cob
+	cowbe-8080.nncgen.exe even.cob even.coo
+	cowlink-8080.nncgen.exe -o even.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo even.coo
+	cowasm-8080.nncgen.exe -o even.com even.asm
+	rm -f even.cob even.coo even.asm
+
+even-8086:
+	cowfe-8086.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/msdos/ even.cow even.cob
+	cowbe-8086.nncgen.exe even.cob even.coo
+	nasm -f bin -o even.com even.asm
+	rm -f even.cob even.coo even.asm
+
+even-z80:
+	cowfe-z80.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpmz/ even.cow even.cob
+	cowbe-z80.nncgen.exe even.cob even.coo
+	cowlink-8080.nncgen.exe -o even.asm /usr/local/share/cowgol/rt/cpmz/cowgol.coo even.coo
+	zmac -j -m -z -o even.cim even.asm
+	rm -f even.cob even.coo even.asm
 
 getstring:
 	cowgolc getstring.cow
