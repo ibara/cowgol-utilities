@@ -41,12 +41,8 @@ var c: uint8 := 0;
 
 # \033[
 sub ConsoleControl() is
-	@asm "mvi e, 27";
-	@asm "mvi c, 2";
-	@asm "call 5";
-	@asm "mvi e, 91";
-	@asm "mvi c, 2";
-	@asm "call 5";
+	print_char(0o033);
+	print_char('[');
 end sub;
 
 sub ConsoleClear() is
