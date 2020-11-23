@@ -62,9 +62,8 @@ end sub;
 sub LinePrint(): (done: uint8) is
 	var x: uint8 := 0;
 
+	c := [BufferLoc];
 	while x < XMAX and c != 0 loop
-		c := [BufferLoc];
-
 		print_char(c);
 		BufferLoc := BufferLoc + 1;
 
@@ -73,6 +72,7 @@ sub LinePrint(): (done: uint8) is
 		end if;
 
 		x := x + 1;
+		c := [BufferLoc];
 	end loop;
 
 	while c != '\n' and c != 0 loop
@@ -101,7 +101,7 @@ sub Scroll(direction: uint8) is
 			AtLine := AtLine + 1;
 		end if;
 	else
-		if AtLine == 0 then
+		if AtLine != 0 then
 			AtLine := AtLine - 1;
 		end if;
 	end if;
