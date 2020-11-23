@@ -29,7 +29,7 @@ const DOWN := 1;
 
 var BufferStart: [uint8];
 var BufferEnd: [uint8];
-var GapStart: [uint8];
+var BufferLoc: [uint8];
 
 var AtLine: uint16 := 0;
 var lines: uint16 := 0;
@@ -51,19 +51,8 @@ sub ConsoleClear() is
 end sub;
 
 sub ConsoleGoto(x: uint8, y: uint8) is
-	if x == 0 and y == 0 then
-		ConsoleControl();
-		print_char('H');
-	else
-		var buffer: uint8[10];
-		ConsoleControl();
-		var pe: [uint8] := IToA((y as int32), 10, (&buffer as [uint8]));
-		print(&buffer[0]);
-		print_char(';');
-		pe := IToA((x as int32), 10, (&buffer as [uint8]));
-		print(&buffer[0]);
-		print_char('H');
-	end if;
+	ConsoleControl();
+	print_char('H');
 end sub;
 
 #
@@ -74,10 +63,10 @@ sub LinePrint(): (done: uint8) is
 	var x: uint8 := 0;
 
 	while x < XMAX and c != 0 loop
-		c := [GapStart];
+		c := [BufferLoc];
 
 		print_char(c);
-		GapStart := GapStart + 1;
+		BufferLoc := BufferLoc + 1;
 
 		if c == '\n' or c == 0 then
 			break;
@@ -87,8 +76,8 @@ sub LinePrint(): (done: uint8) is
 	end loop;
 
 	while c != '\n' and c != 0 loop
-		c := [GapStart];
-		GapStart := GapStart + 1;
+		c := [BufferLoc];
+		BufferLoc := BufferLoc + 1;
 	end loop;
 
 	if c == 0 then
@@ -102,39 +91,31 @@ end sub;
 # Scrolling
 #
 
-sub GotoLine() is
-	c := [GapStart];
-	while c != '\n' and c != 0 loop
-		GapStart := GapStart + 1;
-		c := [GapStart];
-	end loop;
-
-	GapStart := GapStart + 1;
-end sub;
-
 sub Scroll(direction: uint8) is
 	var line: uint16 := 0;
 	var y: uint16 := 0;
 	var done: uint8 := 0;
 
 	if direction == DOWN then
-		if AtLine == lines then
-			return;
+		if AtLine != lines then
+			AtLine := AtLine + 1;
 		end if;
-
-		AtLine := AtLine + 1;
 	else
 		if AtLine == 0 then
-			return;
+			AtLine := AtLine - 1;
 		end if;
-
-		AtLine := AtLine - 1;
 	end if;
 
-	GapStart := BufferStart;
+	BufferLoc := BufferStart;
 
 	while line < AtLine loop
-		GotoLine();
+		c := [BufferLoc];
+		while c != '\n' and c != 0 loop
+			BufferLoc := BufferLoc + 1;
+			c := [BufferLoc];
+		end loop;
+		BufferLoc := BufferLoc + 1;
+
 		line := line + 1;
 	end loop;
 
@@ -170,7 +151,7 @@ sub LoadFile(name: [uint8]) is
 			end if;
 		end if;
 
-		if GapStart == BufferEnd then
+		if BufferLoc == BufferEnd then
 			break;
 		end if;
 
@@ -178,12 +159,12 @@ sub LoadFile(name: [uint8]) is
 			lines := lines + 1;
 		end if;
 
-		[GapStart] := c;
-		GapStart := GapStart + 1;
+		[BufferLoc] := c;
+		BufferLoc := BufferLoc + 1;
 
 		len := len - 1;
 	end loop;
-	[GapStart] := 0;
+	[BufferLoc] := 0;
 
 	if FCBClose(&fcb) != 0 then
 		ExitWithError();
@@ -206,9 +187,9 @@ BufferStart := LOMEM;
 BufferEnd := HIMEM - 1;
 [BufferEnd] := 0;
 
-GapStart := BufferStart;
+BufferLoc := BufferStart;
 LoadFile(FileName);
-GapStart := BufferStart;
+BufferLoc := BufferStart;
 
 ConsoleClear();
 ConsoleGoto(0, 0);
