@@ -14,6 +14,7 @@ Utilities list
 * bfc.cow: Brainfuck to Cowgol transpiler
 * cat.cow: Clone of Unix cat(1) utility
 * dis8080.cow: Intel 8080 disassembler
+* even.cow: Basic pager similar to more(1) or less(1)
 * hexdump.cow: Hexdump utility
 * rpn.cow: Reverse Polish notation calculator
 
