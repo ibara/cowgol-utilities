@@ -36,6 +36,23 @@ var lines: uint16 := 0;
 var c: uint8 := 0;
 
 #
+# Misc
+# Comment out this section when compiling for CP/M
+#
+
+sub SystemOn() is
+	@asm "system(\"stty -icanon\");";
+end sub;
+
+sub SystemOff() is
+	@asm "system(\"stty icanon\");";
+	print_char(0o033);
+	print("[2J");
+	print_char(0o033);
+	print("[H");
+end sub;
+
+#
 # Curses, kinda
 #
 
@@ -50,7 +67,7 @@ sub ConsoleClear() is
 	print("2J");
 end sub;
 
-sub ConsoleGoto(x: uint8, y: uint8) is
+sub ConsoleGoto() is
 	ConsoleControl();
 	print_char('H');
 end sub;
@@ -120,7 +137,7 @@ sub Scroll(direction: uint8) is
 	end loop;
 
 	ConsoleClear();
-	ConsoleGoto(0, 0);
+	ConsoleGoto();
 
 	while y < YMAX and done == 0 loop
 		done := LinePrint();
@@ -137,6 +154,7 @@ sub LoadFile(name: [uint8]) is
 	var len: uint32;
 
 	if FCBOpenIn(&fcb, name) != 0 then
+		SystemOff();
 		ExitWithError();
 	end if;
 
@@ -167,6 +185,7 @@ sub LoadFile(name: [uint8]) is
 	[BufferLoc] := 0;
 
 	if FCBClose(&fcb) != 0 then
+		SystemOff();
 		ExitWithError();
 	end if;
 end sub;
@@ -183,6 +202,8 @@ if FileName == (0 as [uint8]) then
 	ExitWithError();
 end if;
 
+SystemOn();
+
 BufferStart := LOMEM;
 BufferEnd := HIMEM - 1;
 [BufferEnd] := 0;
@@ -192,7 +213,7 @@ LoadFile(FileName);
 BufferLoc := BufferStart;
 
 ConsoleClear();
-ConsoleGoto(0, 0);
+ConsoleGoto();
 
 var done: uint8 := 0;
 var y: uint8 := 0;
@@ -207,6 +228,6 @@ loop
 	case ch is
 		when 'j': Scroll(DOWN);
 		when 'k': Scroll(UP);
-		when 'q': Exit();
+		when 'q': SystemOff(); Exit();
 	end case;
 end loop;
