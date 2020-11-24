@@ -229,5 +229,6 @@ loop
 		when 'j': Scroll(DOWN);
 		when 'k': Scroll(UP);
 		when 'q': SystemOff(); Exit();
+		# CP/M version, when 'q': ConsoleClear(); Exit();
 	end case;
 end loop;
