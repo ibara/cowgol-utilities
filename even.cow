@@ -139,7 +139,7 @@ sub Scroll(direction: uint8) is
 	ConsoleClear();
 	ConsoleGoto();
 
-	while y < YMAX and done == 0 loop
+	while y < (YMAX - 1) and done == 0 loop
 		done := LinePrint();
 		y := y + 1;
 	end loop;
@@ -154,7 +154,6 @@ sub LoadFile(name: [uint8]) is
 	var len: uint32;
 
 	if FCBOpenIn(&fcb, name) != 0 then
-		SystemOff();
 		ExitWithError();
 	end if;
 
@@ -185,7 +184,6 @@ sub LoadFile(name: [uint8]) is
 	[BufferLoc] := 0;
 
 	if FCBClose(&fcb) != 0 then
-		SystemOff();
 		ExitWithError();
 	end if;
 end sub;
@@ -202,8 +200,6 @@ if FileName == (0 as [uint8]) then
 	ExitWithError();
 end if;
 
-SystemOn();
-
 BufferStart := LOMEM;
 BufferEnd := HIMEM - 1;
 [BufferEnd] := 0;
@@ -212,12 +208,13 @@ BufferLoc := BufferStart;
 LoadFile(FileName);
 BufferLoc := BufferStart;
 
+SystemOn();
 ConsoleClear();
 ConsoleGoto();
 
 var done: uint8 := 0;
 var y: uint8 := 0;
-while y < YMAX and done == 0 loop
+while y < (YMAX - 1) and done == 0 loop
 	done := LinePrint();
 	y := y + 1;
 end loop;
