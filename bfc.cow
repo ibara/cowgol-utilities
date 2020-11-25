@@ -34,7 +34,7 @@ sub Compile() is
 		when '>': FCBPutString(&OutputFile, "index := index + 1;\n");
 		when '+': FCBPutString(&OutputFile, "Array[index] := Array[index] + 1;\n");
 		when '-': FCBPutString(&OutputFile, "Array[index] := Array[index] - 1;\n");
-		when ',': ; # XXX: No easy cross-platform to get keyboard input yet?
+		when ',': FCBPutString(&OutputFile, "Array[index] := get_char();\n");
 		when '.': FCBPutString(&OutputFile, "print_char(Array[index]);\n");
 		when '[': depth := depth + 1; FCBPutString(&OutputFile, "while Array[index] != 0 loop\n");
 		when ']': FCBPutString(&OutputFile, "end loop;\n"); depth := depth - 1; if depth < 0 then ExitWithError(); end if;
