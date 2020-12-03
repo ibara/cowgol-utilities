@@ -16,8 +16,7 @@
 
 # Intel 8080 disassembler
 
-include "cowgol.coh";
-include "file.coh";
+include "stdcow.coh";
 include "argv.coh";
 
 var InputFile: FCB;
@@ -25,19 +24,6 @@ var InputFile: FCB;
 var len: uint32;
 var pc: uint16;
 var byte: uint8;
-
-var reg: [uint8][10] = {
-	"a", "b", "c", "d", "e",
-	"h", "l", "m", "psw", "sp"
-};
-
-var inst: [uint8][25] = {
-	"nop", "lxi", "stax", "inx", "inr",
-	"dcx", "dcr", "mvi", "dad", "ldax",
-	"shld", "mov", "add", "adc", "sub",
-	"sbb", "ana", "xra", "ora", "push",
-	"pop", "cmp", "jmp", "call", "ret"
-};
 
 sub OneByte(inst: [uint8], reg: [uint8]) is
 	print_hex_i8(byte);
@@ -91,9 +77,44 @@ sub ThreeByte(inst: [uint8], reg: [uint8]): (bytes: uint16) is
 	bytes := 3;
 end sub;
 
-# Cowgol doesn't dedup strings.
+# Cowgol doesn't notice if you have 2+ identical strings.
+# So you have lots of repetition in the binary.
 # This is gross, but perhaps the best we can do for now.
 sub Disassemble(): (bytes: uint16) is
+	var a: [uint8] := "a";
+	var b: [uint8] := "b";
+	var c: [uint8] := "c";
+	var d: [uint8] := "d";
+	var e: [uint8] := "e";
+	var h: [uint8] := "h";
+	var l: [uint8] := "l";
+	var m: [uint8] := "m";
+	var psw: [uint8] := "psw";
+	var sp: [uint8] := "sp";
+
+	var nop: [uint8] := "nop";
+	var lxi: [uint8] := "lxi";
+	var stax: [uint8] := "stax";
+	var inx: [uint8] := "inx";
+	var inr: [uint8] := "inr";
+	var dcr: [uint8] := "dcr";
+	var mvi: [uint8] := "mvi";
+	var dad: [uint8] := "dad";
+	var ldax: [uint8] := "ldax";
+	var dcx: [uint8] := "dcx";
+	var shld: [uint8] := "shld";
+	var mov: [uint8] := "mov";
+	var add: [uint8] := "add";
+	var adc: [uint8] := "adc";
+	var sub_inst: [uint8] := "sub";
+	var sbb: [uint8] := "sbb";
+	var ana: [uint8] := "ana";
+	var xra: [uint8] := "xra";
+	var ora: [uint8] := "ora";
+	var cmp: [uint8] := "cmp";
+	var pop: [uint8] := "pop";
+	var jmp: [uint8] := "jmp";
+	var push: [uint8] := "push";
 	var ret: [uint8] := "ret";
 	var call: [uint8] := "call";
 
@@ -108,7 +129,7 @@ sub Disassemble(): (bytes: uint16) is
 		when 0x00:
 			OneByte(nop, 0);
 		when 0x01:
-			bytes := ThreeByte(lxi, reg[1]);
+			bytes := ThreeByte(lxi, b);
 		when 0x02:
 			OneByte(stax, b);
 		when 0x03:

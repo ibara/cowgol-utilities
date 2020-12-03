@@ -1,0 +1,57 @@
+include "cowgol.coh";
+
+const XMAX := 80;
+const YMAX := 24;
+
+var cells: uint8[YMAX][XMAX];
+
+# \033
+sub ConsoleClear() is
+	print_char(0o033);
+	print("[2J");
+	print_char(0o033);
+	print("[H");
+end sub;
+
+sub Display() is
+	ConsoleClear();
+
+	var y: uint8 := 0;
+	while y < YMAX loop
+		var x: uint8 := 0;
+		while x < XMAX loop
+			print_char(cells[y][x]);
+
+			x := x + 1;
+		end loop;
+
+		print_char('\n');
+
+		y := y + 1;
+	end loop;
+end sub;
+
+var y: uint8 := 0;
+while y < YMAX loop
+	var x: uint8 := 0;
+	while x < XMAX loop
+		cells[y][x] := ' ';
+
+		x := x + 1;
+	end loop;
+
+	y := y + 1;
+end loop;
+
+ConsoleClear();
+
+cells[3][8] := 'X';
+cells[3][9] := 'X';
+cells[3][10] := 'X';
+cells[3][11] := 'X';
+cells[3][12] := 'X';
+cells[3][13] := 'X';
+cells[3][14] := 'X';
+cells[3][15] := 'X';
+
+Display();
