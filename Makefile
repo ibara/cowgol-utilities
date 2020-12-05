@@ -6,16 +6,16 @@
 # cowgolc, which runs cowfe-cgen through cowlink-cgen
 # as well as the C compiler.
 
-CGENPROG =	bfc bin2hex cat dis8080 even getstring hexdump rpn
+CGENPROG =	bfc bin2hex cat dis8080 even getstring hexdump life rpn
 
 PROG8080 =	bfc-8080 bin2hex-8080 cat-8080 dis8080-8080 even-8080 \
-		getstring-8080 hexdump-8080 rpn-8080
+		getstring-8080 life-8080 hexdump-8080 rpn-8080
 
 PROG8086 =	bfc-8086 bin2hex-8086 cat-8086 dis8080-8086 even-8086 \
-		getstring-8086 hexdump-8086 rpn-8086
+		getstring-8086 life-8086 hexdump-8086 rpn-8086
 
 Z80PROG =	bfc-z80 bin2hex-z80 cat-z80 dis8080-z80 even-z80 \
-		getstring-z80 hexdump-z80 rpn-z80
+		getstring-z80 hexdump-z80 life-z80 rpn-z80
 
 all: ${CGENPROG}
 
@@ -200,6 +200,16 @@ hexdump-z80:
 	cowlink-8080.nncgen.exe -o hexdump.asm /usr/local/share/cowgol/rt/cpmz/cowgol.coo hexdump.coo
 	zmac -j -m -z -o hexdump.cim hexdump.asm
 	rm -f hexdump.cob hexdump.coo hexdump.asm
+
+life:
+	cowgolc life.cow
+
+life-8080:
+	cowfe-16bit.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ life.cow life.cob
+	cowbe-8080.nncgen.exe life.cob life.coo
+	cowlink-8080.nncgen.exe -o life.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo life.coo
+	cowasm-8080.nncgen.exe -o life.com life.asm
+	rm -f life.cob life.coo life.asm
 
 rpn:
 	cowgolc rpn.cow

@@ -1,0 +1,217 @@
+#
+# Copyright (c) 2020 Brian Callahan <bcallah@openbsd.org>
+#
+# Permission to use, copy, modify, and distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+# THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+# WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+# ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+# WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+# ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+# OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+#
+
+include "stdcow.coh";
+
+# Game of Life
+# Assumes ANSI terminal, hardcoded dimensions
+
+const XMAX := 80;
+const YMAX := 24;
+
+var cells1: uint8[XMAX][YMAX];
+var cells2: uint8[XMAX][YMAX];
+
+# \033[
+sub ConsoleControl() is
+	print_char(0o033);
+	print_char('[');
+end sub;
+
+sub ConsoleClear() is
+	ConsoleControl();
+	print("2J");
+	ConsoleControl();
+	print_char('H');
+end sub;
+
+sub ConsoleGoto(y: int8, x: int8) is
+	ConsoleControl();
+	print_d32(((y + 1) as int32));
+	print(";");
+	print_d32(((x + 1) as int32));
+	print("H");
+end sub;
+
+sub Display() is
+	ConsoleClear();
+
+	var y: uint8 := 0;
+	while y < YMAX loop
+		var x: uint8 := 0;
+		while x < XMAX loop
+			print_char(cells1[y][x]);
+
+			x := x + 1;
+		end loop;
+
+		print_char('\n');
+
+		y := y + 1;
+	end loop;
+end sub;
+
+sub Setup() is
+	ConsoleClear();
+
+	var y: int8 := 0;
+	while y < YMAX loop
+		var x: int8 := 0;
+		while x < XMAX loop
+			cells1[(y as uint8)][(x as uint8)] := ' ';
+
+			x := x + 1;
+		end loop;
+
+		y := y + 1;
+	end loop;
+
+	y := 0;
+	x := 0;
+
+	loop
+		Display();
+		ConsoleGoto(y, x);
+
+		var ch := get_char();
+		case ch is
+		when 'h':
+			x := x - 1;
+			if x < 0 then
+				x := XMAX - 1;
+			end if;
+		when 'j':
+			y := y + 1;
+			if y > YMAX - 1 then
+				y := 0;
+			end if;
+		when 'k':
+			y := y - 1;
+			if y < 0 then
+				y := YMAX - 1;
+			end if;
+		when 'l':
+			x := x + 1;
+			if x > XMAX - 1 then
+				x := 0;
+			end if;
+		when ' ':
+			if cells1[(y as uint8)][(x as uint8)] == ' ' then
+				cells1[(y as uint8)][(x as uint8)] := 'O';
+			else
+				cells1[(y as uint8)][(x as uint8)] := ' ';
+			end if;
+		when '\r':
+			return;
+		when '\n':
+			return;
+		when 'q':
+			Exit();
+		end case;
+	end loop;
+end sub;
+
+sub Swap() is
+	var y: uint8 := 0;
+	while y < YMAX loop
+		var x: uint8 := 0;
+		while x < XMAX loop
+			cells1[y][x] := cells2[y][x];
+
+			x := x + 1;
+		end loop;
+
+		y := y + 1;
+	end loop;
+end sub;
+
+sub Calculate(y: int8, x: int8) is
+	var i: int8 := -1;
+	var n: uint8 := 0;
+
+	while i < 2 loop
+		var j: int8 := -1;
+		while j < 2 loop
+			if i == 0 and j == 0 then
+				j := j + 1;
+
+				continue;
+			end if;
+
+			var xx: int8 := x + j;
+			var yy: int8 := y + i;
+
+			if yy > YMAX - 1 then
+				yy := 0;
+			elseif yy < 0 then
+				yy := YMAX - 1;
+			end if;
+
+			if xx > XMAX - 1 then
+				xx := 0;
+			elseif xx < 0 then
+				xx := XMAX - 1;
+			end if;
+
+			if cells1[(yy as uint8)][(xx as uint8)] == 'O' then
+				n := n + 1;
+			end if;
+
+			j := j + 1;
+		end loop;
+
+		i := i + 1;
+	end loop;
+
+	if (n == 3) or (n == 2 and cells1[(y as uint8)][(x as uint8)] == 'O') then
+		cells2[(y as uint8)][(x as uint8)] := 'O';
+	else
+		cells2[(y as uint8)][(x as uint8)] := ' ';
+	end if;
+end sub;
+
+sub Run() is
+	ConsoleControl();
+	print("?25l");
+
+	loop
+		var y: int8 := 0;
+		while y < YMAX loop
+			var x: int8 := 0;
+			while x < XMAX loop
+				Calculate(y, x);
+
+				x := x + 1;
+			end loop;
+
+		y := y + 1;
+		end loop;
+
+		Swap();
+		Display();
+
+		var c: uint8 := CharSelect(1, 0);
+		if c == 'q' then
+			break;
+		end if;
+	end loop;
+
+	ConsoleControl();
+	print("?25h");
+end sub;
+
+Setup();
+Run();

@@ -88,3 +88,36 @@ sub GetString(): (s: [uint8]) is
 	s := Alloc(((i + 1) as intptr));
 	CopyString(&temp[0], s);
 end sub;
+
+# Ugly
+sub CharSelect(sec: uint32, usec: uint32): (c: uint8) is
+	# Cgen version
+#	@asm "struct timeval timeout;";
+#	@asm "timeout.tv_sec = ", sec, ";";
+#	@asm "timeout.tv_usec = ", usec, ";";
+#	@asm "fd_set fds;";
+#	@asm "FD_ZERO(&fds);";
+#	@asm "FD_SET(0, &fds);";
+#	@asm "if (select(1, &fds, NULL, NULL, &timeout) == 1)";
+#	@asm "read(0, &", c, ", 1);";
+
+	# CP/M version
+	sec := sec * 1000000;
+	sec := sec + usec;
+
+	# 0 means block indefinitely
+	if sec == 0 then
+		c := get_char();
+
+		return;
+	end if;
+
+	while sec > 0 loop
+		sec := sec - 1;
+	end loop;
+
+	@asm "mvi e, 255";
+	@asm "mvi c, 6";
+	@asm "call 5";
+	@asm "sta", c;
+end sub;
