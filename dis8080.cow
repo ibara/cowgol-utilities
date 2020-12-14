@@ -121,9 +121,8 @@ sub Disassemble(): (bytes: uint16) is
 	bytes := 1;
 	byte := FCBGetChar(&InputFile);
 
-	print("    ");
 	print_hex_i16(pc);
-	print(":\t");
+	print("\t");
 
 	case byte is
 		when 0x00:
@@ -227,7 +226,7 @@ sub Disassemble(): (bytes: uint16) is
 		when 0x31:
 			bytes := ThreeByte(lxi, sp);
 		when 0x32:
-			bytes := ThreeByte(shld, 0);
+			bytes := ThreeByte("sta", 0);
 		when 0x33:
 			OneByte(inx, sp);
 		when 0x34:
