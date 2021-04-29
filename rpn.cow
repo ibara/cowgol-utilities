@@ -16,32 +16,12 @@
 
 # Reverse Polish notation calculator
 
-include "stdcow.coh";
-include "argv.coh";
+include "cowgol.coh";
 
 var input: uint8[11];
 
 var stack: int32[4];
 var depth: int8 := 0;
-
-sub Process(buffer: [uint8]): (result: int32) is
-	var c: uint8 := [buffer];
-
-	result := 0;
-
-	loop
-		if c >= '0' and c <= '9' then
-			c := c - '0';
-		else
-			break;
-		end if;
-
-		result := result * 10 + (c as int32);
-
-		buffer := buffer + 1;
-		c := [buffer];
-	end loop;
-end sub;
 
 sub Push(entry: int32) is
 	if depth == 4 then
@@ -56,16 +36,6 @@ sub Push(entry: int32) is
 	end if;
 end sub;
 
-sub Pop(): (entry: int32) is
-	depth := depth - 1;
-	if depth < 0 then
-		depth := 0;
-	end if;
-
-	entry := stack[(depth as uint8)];
-	stack[(depth as uint8)] := 0;
-end sub;
-
 sub Clear() is
 	stack[0] := 0;
 	stack[1] := 0;
@@ -75,6 +45,16 @@ sub Clear() is
 end sub;
 
 sub Calculate(op: uint8) is
+	sub Pop(): (entry: int32) is
+		depth := depth - 1;
+		if depth < 0 then
+			depth := 0;
+		end if;
+
+		entry := stack[(depth as uint8)];
+		stack[(depth as uint8)] := 0;
+	end sub;
+
 	var t: int32 := Pop();
 
 	case op is
@@ -102,6 +82,25 @@ sub Calculate(op: uint8) is
 end sub;
 
 sub GetInput() is
+	sub Process(buffer: [uint8]): (result: int32) is
+		var c: uint8 := [buffer];
+
+		result := 0;
+
+		loop
+			if c >= '0' and c <= '9' then
+				c := c - '0';
+			else
+				break;
+			end if;
+
+			result := result * 10 + (c as int32);
+
+			buffer := buffer + 1;
+			c := [buffer];
+		end loop;
+	end sub;
+
 	var c: uint8;
 	var count: uint8 := 0;
 
@@ -145,6 +144,13 @@ sub GetInput() is
 end sub;
 
 sub PrintStack() is
+	# Print a signed 32-bit integer to the console.
+	sub print_d32(value: int32) is
+		var buffer: uint8[12];
+		var pe := IToA(value, 10, &buffer[0]);
+		print(&buffer[0]);
+	end sub;
+
 	print_char(0o033);
 	print("[2J");
 	print_char(0o33);
