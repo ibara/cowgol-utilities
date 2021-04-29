@@ -44,12 +44,13 @@ sub Process(buffer: [uint8]): (result: int32) is
 end sub;
 
 sub Push(entry: int32) is
-	if depth < 0 then
-		depth := 0;
+	if depth == 4 then
+		depth := 3;
 	end if;
-	stack[(depth as uint8)] := entry;
-	depth := depth + 1;
 
+	stack[(depth as uint8)] := entry;
+
+	depth := depth + 1;
 	if depth > 3 then
 		depth := 4;
 	end if;
@@ -58,13 +59,11 @@ end sub;
 sub Pop(): (entry: int32) is
 	depth := depth - 1;
 	if depth < 0 then
-		depth := -1;
-		entry := stack[0];
-		stack[0] := 0;
-	else
-		entry := stack[(depth as uint8)];
-		stack[(depth as uint8)] := 0;
+		depth := 0;
 	end if;
+
+	entry := stack[(depth as uint8)];
+	stack[(depth as uint8)] := 0;
 end sub;
 
 sub Clear() is
@@ -138,37 +137,23 @@ sub GetInput() is
 		Clear();
 	elseif c == 'q' then
 		Exit();
-	else
-		while c != 10 and c != 13 loop
-			c := get_char();
-		end loop;
-		print("\n?\n");
 	end if;
+
+	while c != 10 and c != 13 loop
+		c := get_char();
+	end loop;
 end sub;
 
 sub PrintStack() is
-	print("\n--------------------\n");
-	if depth == 0 or depth == 1 then
-		print("*0: ");
-	else
-		print(" 0: ");
-	end if;
-	print_d32(stack[0]);
+	print_char(0o033);
+	print("[2J");
+	print_char(0o33);
+	print("[H");
+
+	print("Reverse Polish Notation Calculator");
 	print_nl();
-	if depth == 2 then
-		print("*1: ");
-	else
-		print(" 1: ");
-	end if;
-	print_d32(stack[1]);
 	print_nl();
-	if depth == 3 then
-		print("*2: ");
-	else
-		print(" 2: ");
-	end if;
-	print_d32(stack[2]);
-	print_nl();
+
 	if depth == 4 then
 		print("*3: ");
 	else
@@ -176,7 +161,33 @@ sub PrintStack() is
 	end if;
 	print_d32(stack[3]);
 	print_nl();
+
+	if depth == 3 then
+		print("*2: ");
+	else
+		print(" 2: ");
+	end if;
+	print_d32(stack[2]);
 	print_nl();
+
+	if depth == 2 then
+		print("*1: ");
+	else
+		print(" 1: ");
+	end if;
+	print_d32(stack[1]);
+	print_nl();
+
+	if depth == 0 or depth == 1 then
+		print("*0: ");
+	else
+		print(" 0: ");
+	end if;
+	print_d32(stack[0]);
+	print_nl();
+
+	print_nl();
+	print("input: ");
 end sub;
 
 Clear();
