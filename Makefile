@@ -211,11 +211,18 @@ life-8080:
 	cowasm-8080.nncgen.exe -o life.com life.asm
 	rm -f life.cob life.coo life.asm
 
+morse:
+	cowfe-16bit.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ morse.cow morse.cob
+	cowbe-8080.nncgen.exe morse.cob morse.coo
+	cowlink-8080.nncgen.exe -o morse.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo morse.coo
+	cowasm-8080.nncgen.exe -o morse.com morse.asm
+	rm -f morse.cob morse.coo morse.asm
+
 rpn:
 	cowgolc rpn.cow
 
 rpn-8080:
-	cowfe-8080.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rpn.cow rpn.cob
+	cowfe-16bit.nncgen.exe -I/usr/local/share/cowgol/rt/ -I/usr/local/share/cowgol/rt/cpm/ rpn.cow rpn.cob
 	cowbe-8080.nncgen.exe rpn.cob rpn.coo
 	cowlink-8080.nncgen.exe -o rpn.asm /usr/local/share/cowgol/rt/cpm/cowgol.coo rpn.coo
 	cowasm-8080.nncgen.exe -o rpn.com rpn.asm
